@@ -38,7 +38,7 @@ describe('LoginForm', () => {
     it('renders the login form correctly', () => {
         render(<LoginForm />);
 
-        expect(screen.getByText('Login to your account')).toBeInTheDocument();
+        expect(screen.getByText('Login to your Eduley account')).toBeInTheDocument();
         expect(screen.getByLabelText('Email')).toBeInTheDocument();
         expect(screen.getByLabelText('Password')).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();

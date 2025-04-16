@@ -3,4 +3,6 @@ export const apiEndpoints = {
     refresh: '/api/token/refresh/',
     logout: '/logout/',
     user: '/iap/admin/',
+    roles: '/iap/group/',
+    iapUser: '/iap/user/:id/',
 };

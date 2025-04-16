@@ -10,7 +10,9 @@ function authRequestInterceptor(config: InternalAxiosRequestConfig) {
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
-        config.headers['Content-Type'] = 'application/json';
+        if (!config.headers['Content-Type']) {
+            config.headers['Content-Type'] = 'application/json';
+        }
     }
     return config;
 }

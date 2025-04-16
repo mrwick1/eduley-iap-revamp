@@ -3,21 +3,26 @@ import { Layout } from '../layout/layout';
 import { AuthLayout } from '../layout/auth-layout';
 import '@/index.css';
 import { loginRoute } from './routes/login-page';
+import NotFoundError from '@/features/errors/not-found-error';
+import GeneralError from '@/features/errors/general-error';
+import { profileRoute, settingsRoute } from './routes/settings-page';
 
 // Root route with layout
 export const rootRoute = createRootRoute({
     component: AuthLayout,
+    notFoundComponent: NotFoundError,
+    errorComponent: GeneralError,
 });
 
 // Index route
-const indexRoute = createRoute({
+export const indexRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: '/',
     component: () => <Layout />,
 });
 
 // Create the route tree
-const routeTree = rootRoute.addChildren([indexRoute, loginRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, loginRoute, settingsRoute.addChildren([profileRoute])]);
 
 // Create the router
 export const router = createRouter({ routeTree });

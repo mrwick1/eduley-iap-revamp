@@ -47,7 +47,6 @@ const getUser = async (): Promise<User | null> => {
         const user = response.data?.[0];
         useUserStore.getState().setUser(user);
         useUserStore.getState().setAuthenticated(true);
-        console.log(useUserStore.getState());
         return user;
     } catch (error) {
         useUserStore.getState().setUser(null);

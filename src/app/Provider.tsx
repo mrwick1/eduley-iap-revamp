@@ -50,7 +50,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
                             <NavigationProgress />
                             {children}
                         </AuthLoader>
-                        <Toaster richColors position="top-right" duration={2000} />
+                        <Toaster richColors position="top-right" duration={2000} closeButton />
                     </QueryClientProvider>
                 </HelmetProvider>
             </Suspense>
