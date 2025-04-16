@@ -1,5 +1,4 @@
 import Axios, { InternalAxiosRequestConfig } from 'axios';
-import { toast } from 'sonner';
 import { paths } from '../config/paths';
 import { QueryClient } from '@tanstack/react-query';
 import { tokenStorage } from './token';
