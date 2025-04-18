@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { useUserStore } from '@/store/userSlice';
-import { getRoles, getUser, updateUser } from '../api/api';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { ImageCropper } from '@/components/ui/image-cropper';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -16,30 +15,24 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { Spinner } from '@/components/ui/spinner';
 import { toast } from 'sonner';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ROLES } from '@/const/role';
+import { cn } from '@/lib/utils';
+import { Tooltip } from '@/components/ui/tooltip';
+import { getRoles, getUser, updateUser } from '../api/api';
 
+const MAX_ROLES = 10;
+
+import ProfileLoading from './profile-loading';
 const profileFormSchema = z.object({
     first_name: z
         .string()
-        .min(2, {
-            message: 'First name must be at least 2 characters.',
-        })
-        .max(30, {
-            message: 'First name must not be longer than 30 characters.',
-        }),
+        .min(2, { message: 'First name must be at least 2 characters.' })
+        .max(30, { message: 'First name must not be longer than 30 characters.' }),
     last_name: z
         .string()
-        .min(2, {
-            message: 'Last name must be at least 2 characters.',
-        })
-        .max(30, {
-            message: 'Last name must not be longer than 30 characters.',
-        }),
-    email: z
-        .string({
-            required_error: 'Please enter your email.',
-        })
-        .email(),
+        .min(1, { message: 'Last name must be at least 1 characters.' })
+        .max(30, { message: 'Last name must not be longer than 30 characters.' }),
+    email: z.string({ required_error: 'Please enter your email.' }).email(),
     profile_photo: z.union([z.string(), z.instanceof(File)]).optional(),
     groups: z.array(z.number()).optional(),
 });
@@ -62,6 +55,10 @@ export default function ProfileForm() {
         },
     });
 
+    // check if the user is an admin
+    // if the user is admin they should not be able to remove the management role, they should not be able to remove the management role,
+    // also for other roles they should not be able to change their roles
+    const isManagement = user?.groups.includes(ROLES.MANAGEMENT);
     // get the user data from the api
     const { data: userData, isLoading: isUserLoading } = useQuery({
         queryKey: ['user', user?.id],
@@ -150,38 +147,16 @@ export default function ProfileForm() {
     };
 
     if (isUserLoading || isRolesLoading) {
-        return (
-            <div className="space-y-8">
-                <div className="flex items-center gap-4">
-                    <Skeleton className="h-28 w-28 rounded-full" />
-                    <Skeleton className="h-10 w-32" />
-                </div>
-                <div className="space-y-4">
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-4 w-64" />
-                    </div>
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-4 w-64" />
-                    </div>
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-24" />
-                        <div className="flex flex-wrap gap-2">
-                            <Skeleton className="h-6 w-20" />
-                            <Skeleton className="h-6 w-20" />
-                            <Skeleton className="h-6 w-20" />
-                        </div>
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-4 w-64" />
-                    </div>
-                </div>
-            </div>
-        );
+        return <ProfileLoading />;
     }
 
+    // error messages
+    const disabledInfoRoles = !isManagement
+        ? 'Only users with Management role can modify roles'
+        : form.getValues('groups')?.length === MAX_ROLES
+          ? `You have selected all the roles available`
+          : undefined;
+    const disabledInfoEmail = 'For security reasons, the email address cannot be altered';
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8" encType="multipart/form-data">
@@ -258,7 +233,12 @@ export default function ProfileForm() {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input placeholder="john@example.com" {...field} disabled />
+                                <Input
+                                    placeholder="john@example.com"
+                                    {...field}
+                                    disabled
+                                    disabledInfo={disabledInfoEmail}
+                                />
                             </FormControl>
                             <FormDescription>
                                 This is the email address associated with your account. It will be used for
@@ -274,46 +254,115 @@ export default function ProfileForm() {
                     name="groups"
                     render={() => (
                         <FormItem>
-                            <FormLabel>Groups</FormLabel>
+                            <FormLabel>Roles</FormLabel>
                             <div className="flex flex-wrap gap-2 mb-2">
                                 {selectedGroups.map((groupId) => {
                                     const role = roles?.find((r) => r.id === groupId);
+                                    const isDisabled =
+                                        isUpdating || !isManagement || (isManagement && role?.name === 'Management');
+                                    const tooltipMessage = !isManagement
+                                        ? 'Only users with Management role can modify roles'
+                                        : isManagement && role?.name === 'Management'
+                                          ? 'Users with Management role cannot remove the Management role'
+                                          : null;
+
                                     return role ? (
-                                        <Badge key={groupId} variant="secondary" className="flex items-center gap-1">
-                                            {role.name}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleGroupSelect(groupId)}
-                                                className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                                                disabled={isUpdating}
+                                        tooltipMessage ? (
+                                            <Tooltip message={tooltipMessage} key={groupId}>
+                                                <div>
+                                                    <Badge
+                                                        variant="secondary"
+                                                        className={cn(
+                                                            'flex items-center gap-1',
+                                                            isManagement && role.name === 'Management' && 'opacity-50',
+                                                        )}
+                                                    >
+                                                        {role.name}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleGroupSelect(groupId)}
+                                                            className={cn(
+                                                                'ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                                                            )}
+                                                            disabled={isDisabled}
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </Badge>
+                                                </div>
+                                            </Tooltip>
+                                        ) : (
+                                            <Badge
+                                                key={groupId}
+                                                variant="secondary"
+                                                className={cn(
+                                                    'flex items-center gap-1',
+                                                    isManagement && role.name === 'Management' && 'opacity-50',
+                                                )}
                                             >
-                                                <X className="h-3 w-3" />
-                                            </button>
-                                        </Badge>
+                                                {role.name}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleGroupSelect(groupId)}
+                                                    className={cn(
+                                                        'ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                                                    )}
+                                                    disabled={isDisabled}
+                                                >
+                                                    <X className="h-3 w-3" />
+                                                </button>
+                                            </Badge>
+                                        )
                                     ) : null;
                                 })}
                             </div>
-                            <Select onValueChange={(value) => handleGroupSelect(Number(value))} disabled={isUpdating}>
-                                <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select groups" />
-                                    </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                    {roles?.map((role) => (
-                                        <SelectItem
-                                            key={role.id}
-                                            value={role.id.toString()}
-                                            disabled={selectedGroups.includes(role.id)}
-                                        >
-                                            {role.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <FormDescription>
-                                Select the groups for this user. You can select multiple groups.
-                            </FormDescription>
+                            {isManagement && (
+                                <>
+                                    <Select
+                                        onValueChange={(value) => handleGroupSelect(Number(value))}
+                                        disabled={
+                                            isUpdating ||
+                                            !isManagement ||
+                                            form.getValues('groups')?.length === MAX_ROLES
+                                        }
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger disabledInfo={disabledInfoRoles}>
+                                                <SelectValue placeholder="Select roles" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            {roles?.map((role) => {
+                                                const isDisabled = selectedGroups.includes(role.id);
+                                                const tooltipMessage = isDisabled ? 'Role already assigned' : undefined;
+                                                return isDisabled ? (
+                                                    <Tooltip message={tooltipMessage} key={role.id}>
+                                                        <div>
+                                                            <SelectItem
+                                                                value={role.id.toString()}
+                                                                disabled={isDisabled}
+                                                            >
+                                                                {role.name}
+                                                            </SelectItem>
+                                                        </div>
+                                                    </Tooltip>
+                                                ) : (
+                                                    <SelectItem
+                                                        key={role.id}
+                                                        value={role.id.toString()}
+                                                        disabled={isDisabled}
+                                                    >
+                                                        {role.name}
+                                                    </SelectItem>
+                                                );
+                                            })}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormDescription>
+                                        Select the roles for this user. You can select multiple roles.
+                                    </FormDescription>
+                                </>
+                            )}
                             <FormMessage />
                         </FormItem>
                     )}

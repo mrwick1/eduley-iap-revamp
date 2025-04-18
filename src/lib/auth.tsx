@@ -3,10 +3,12 @@ import { z } from 'zod';
 import { api } from './api-client';
 import { User, useUserStore } from '../store/userSlice';
 import { useStore } from '../store';
-import { tokenStorage } from './token';
+import { TokenType, tokenStorage } from './token';
 import { apiEndpoints } from '@/config/api-endpoints';
 import { Navigate } from '@tanstack/react-router';
 import React from 'react';
+import { tryCatch } from '@/utils/try-catch';
+import { useInstituteStore } from '../store/instituteSlice';
 
 // Zod schema for login input validation
 const loginInputSchema = z.object({
@@ -33,24 +35,35 @@ const getUser = async (): Promise<User | null> => {
                     tokenStorage.clearTokens();
                     useUserStore.getState().setUser(null);
                     useUserStore.getState().setAuthenticated(false);
+                    useInstituteStore.getState().setInstitute(null);
                     return null;
                 }
             } else {
                 tokenStorage.clearTokens();
                 useUserStore.getState().setUser(null);
                 useUserStore.getState().setAuthenticated(false);
+                useInstituteStore.getState().setInstitute(null);
                 return null;
             }
         }
 
-        const response = await api.get(apiEndpoints.user);
-        const user = response.data?.[0];
+        const [userResponse, instituteResponse] = await Promise.all([
+            api.get(apiEndpoints.user),
+            api.get(apiEndpoints.institute),
+        ]);
+
+        const user = userResponse.data?.[0];
+        const institute = instituteResponse.data?.[0];
+
         useUserStore.getState().setUser(user);
         useUserStore.getState().setAuthenticated(true);
+        useInstituteStore.getState().setInstitute(institute);
+
         return user;
     } catch (error) {
         useUserStore.getState().setUser(null);
         useUserStore.getState().setAuthenticated(false);
+        useInstituteStore.getState().setInstitute(null);
         return null;
     }
 };
@@ -63,8 +76,18 @@ const getUser = async (): Promise<User | null> => {
 
 const login = async (data: LoginInput): Promise<User> => {
     try {
-        const response = await api.post(apiEndpoints.login, data);
-        tokenStorage.setTokens(response.data);
+        const { data: tokenData, error } = await tryCatch<TokenType>(async () => {
+            const response = await api.post<TokenType>(apiEndpoints.login, data);
+            return response.data;
+        });
+
+        if (error) {
+            throw error;
+        }
+        if (!tokenData) {
+            throw new Error('No token data received');
+        }
+        tokenStorage.setTokens(tokenData);
 
         // Fetch user data after successful login
         const userResponse = await api.get(apiEndpoints.user);

@@ -114,7 +114,7 @@ describe('LoginForm', () => {
         await user.type(passwordInput, 'password123');
         await user.click(submitButton);
 
-        expect(mockNavigate).toHaveBeenCalledWith({ to: '/' });
+        expect(mockNavigate).toHaveBeenCalledWith({ to: '/dashboard' });
     });
 
     it('handles login failure and shows error toast', async () => {

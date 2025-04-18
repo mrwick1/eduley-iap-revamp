@@ -9,6 +9,7 @@ import { Toaster } from 'sonner';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 import { CatchBoundary } from '@tanstack/react-router';
 import { NavigationProgress } from '@/components/navigation-progress';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = useState(
@@ -47,8 +48,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
                                 </div>
                             )}
                         >
-                            <NavigationProgress />
-                            {children}
+                            <TooltipPrimitive.Provider delayDuration={100}>
+                                <NavigationProgress />
+                                {children}
+                            </TooltipPrimitive.Provider>
                         </AuthLoader>
                         <Toaster richColors position="top-right" duration={2000} closeButton />
                     </QueryClientProvider>

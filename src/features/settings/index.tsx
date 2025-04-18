@@ -4,17 +4,14 @@ import { Separator } from '@/components/ui/separator';
 import { Search } from '@/components/search';
 import { Header } from '@/components/sidebar/Header';
 import { Main } from '@/layout/main';
-import { ThemeSwitch } from '@/components/theme-switch';
+// import { ThemeSwitch } from '@/components/theme-switch';
 import SidebarNav from '@/components/sidebar-nav';
 
 export default function Settings() {
     return (
-        <>
+        <div className="flex h-screen flex-col">
             <Header>
                 <Search />
-                <div className="ml-auto flex items-center space-x-4">
-                    <ThemeSwitch />
-                </div>
             </Header>
 
             <Main fixed>
@@ -27,12 +24,12 @@ export default function Settings() {
                     <aside className="top-0 lg:sticky lg:w-1/5">
                         <SidebarNav items={sidebarNavItems} />
                     </aside>
-                    <div className="flex w-full overflow-y-hidden p-1">
+                    <div className="flex-1 overflow-y-auto p-1">
                         <Outlet />
                     </div>
                 </div>
             </Main>
-        </>
+        </div>
     );
 }
 

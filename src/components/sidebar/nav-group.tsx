@@ -51,10 +51,14 @@ const NavBadge = ({ children }: { children: ReactNode }) => (
 );
 
 const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
-    const { setOpenMobile } = useSidebar();
+    const { setOpenMobile, state } = useSidebar();
     return (
         <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={checkIsActive(href, item)} tooltip={item.title}>
+            <SidebarMenuButton
+                asChild
+                isActive={checkIsActive(href, item)}
+                tooltip={state === 'collapsed' ? item.title : undefined}
+            >
                 <Link to={item.url} onClick={() => setOpenMobile(false)}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
@@ -66,12 +70,12 @@ const SidebarMenuLink = ({ item, href }: { item: NavLink; href: string }) => {
 };
 
 const SidebarMenuCollapsible = ({ item, href }: { item: NavCollapsible; href: string }) => {
-    const { setOpenMobile } = useSidebar();
+    const { setOpenMobile, state } = useSidebar();
     return (
         <Collapsible asChild defaultOpen={checkIsActive(href, item, true)} className="group/collapsible">
             <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                    <SidebarMenuButton tooltip={item.title}>
+                    <SidebarMenuButton tooltip={state === 'collapsed' ? item.title : undefined}>
                         {item.icon && <item.icon />}
                         <span>{item.title}</span>
                         {item.badge && <NavBadge>{item.badge}</NavBadge>}
@@ -99,11 +103,15 @@ const SidebarMenuCollapsible = ({ item, href }: { item: NavCollapsible; href: st
 };
 
 const SidebarMenuCollapsedDropdown = ({ item, href }: { item: NavCollapsible; href: string }) => {
+    const { state } = useSidebar();
     return (
         <SidebarMenuItem>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <SidebarMenuButton tooltip={item.title} isActive={checkIsActive(href, item)}>
+                    <SidebarMenuButton
+                        tooltip={state === 'collapsed' ? item.title : undefined}
+                        isActive={checkIsActive(href, item)}
+                    >
                         {item.icon && <item.icon />}
                         <span>{item.title}</span>
                         {item.badge && <NavBadge>{item.badge}</NavBadge>}

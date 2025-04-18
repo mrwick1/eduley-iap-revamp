@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip } from '@/components/ui/tooltip';
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state';
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
@@ -111,25 +111,23 @@ function SidebarProvider({
 
     return (
         <SidebarContext.Provider value={contextValue}>
-            <TooltipProvider delayDuration={0}>
-                <div
-                    data-slot="sidebar-wrapper"
-                    style={
-                        {
-                            '--sidebar-width': SIDEBAR_WIDTH,
-                            '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-                            ...style,
-                        } as React.CSSProperties
-                    }
-                    className={cn(
-                        'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full',
-                        className,
-                    )}
-                    {...props}
-                >
-                    {children}
-                </div>
-            </TooltipProvider>
+            <div
+                data-slot="sidebar-wrapper"
+                style={
+                    {
+                        '--sidebar-width': SIDEBAR_WIDTH,
+                        '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
+                        ...style,
+                    } as React.CSSProperties
+                }
+                className={cn(
+                    'group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full',
+                    className,
+                )}
+                {...props}
+            >
+                {children}
+            </div>
         </SidebarContext.Provider>
     );
 }
@@ -467,31 +465,22 @@ const SidebarMenuButton = React.forwardRef<
     React.ComponentProps<'button'> & {
         asChild?: boolean;
         isActive?: boolean;
-        tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+        tooltip?: string;
     } & VariantProps<typeof sidebarMenuButtonVariants>
 >(({ asChild = false, isActive = false, variant = 'default', size = 'default', tooltip, className, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
     return (
-        <TooltipProvider>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Comp
-                        ref={ref}
-                        className={cn(
-                            sidebarMenuButtonVariants({ variant, size }),
-                            isActive && 'bg-accent text-accent-foreground',
-                            className,
-                        )}
-                        {...props}
-                    />
-                </TooltipTrigger>
-                {tooltip && (
-                    <TooltipContent>
-                        {typeof tooltip === 'string' ? tooltip : <TooltipContent {...tooltip} />}
-                    </TooltipContent>
+        <Tooltip message={tooltip}>
+            <Comp
+                ref={ref}
+                className={cn(
+                    sidebarMenuButtonVariants({ variant, size }),
+                    isActive && 'bg-accent text-accent-foreground',
+                    className,
                 )}
-            </Tooltip>
-        </TooltipProvider>
+                {...props}
+            />
+        </Tooltip>
     );
 });
 SidebarMenuButton.displayName = 'SidebarMenuButton';

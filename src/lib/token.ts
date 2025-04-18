@@ -1,6 +1,6 @@
 import { jwtDecode } from 'jwt-decode';
 
-export interface TokenResponse {
+export interface TokenType {
     refresh: string;
     access: string;
     domain: string;
@@ -15,7 +15,7 @@ interface TokenPayload {
 }
 
 export const tokenStorage = {
-    setTokens: (tokens: TokenResponse) => {
+    setTokens: (tokens: TokenType) => {
         localStorage.setItem('access_token', tokens.access);
         localStorage.setItem('refresh_token', tokens.refresh);
         localStorage.setItem('domain', tokens.domain);

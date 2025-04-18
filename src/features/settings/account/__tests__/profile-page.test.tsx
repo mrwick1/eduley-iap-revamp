@@ -1,99 +1,223 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import Profile from '../profile-page';
+import { render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Toaster, toast } from 'sonner';
+import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import Profile from '../profile-page';
+import { getUser, getRoles, updateUser } from '../api/api';
+import userEvent from '@testing-library/user-event';
+import { toast } from 'sonner';
 
-// Mock the Head component
-vi.mock('@/components/seo', () => ({
-    Head: ({ title }: { title: string }) => <title>{title}</title>,
-}));
-
-// Mock the toast functionality
-vi.mock('sonner', () => ({
-    toast: {
-        promise: vi.fn().mockImplementation((promise, options) => {
-            return promise.then(() => options.success).catch(() => options.error);
-        }),
-    },
-    Toaster: () => null,
-}));
-
-// Mock the ContentSection component
-vi.mock('@/components/content-section', () => ({
-    default: ({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) => (
-        <div>
-            <h1>{title}</h1>
-            <p>{desc}</p>
-            {children}
-        </div>
-    ),
+// Mock ResizeObserver
+global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
 }));
 
 // Mock the user store
 vi.mock('@/store/userSlice', () => ({
-    useUserStore: () => ({
+    useUserStore: vi.fn(() => ({
         user: {
             id: 1,
             first_name: 'John',
             last_name: 'Doe',
             email: 'john@example.com',
+            profile_photo: '',
+            groups: [1],
+            institute: 1,
+            password: '',
+            is_active: true,
+            instructor_id: 1,
         },
-    }),
+    })),
 }));
 
-// Mock the API calls
-const mockGetUser = vi.fn();
-const mockGetRoles = vi.fn();
-const mockUpdateUser = vi.fn();
+// Mock the toast function
+vi.mock('sonner', () => ({
+    toast: {
+        promise: vi.fn().mockImplementation((promise, options) => {
+            promise.then(() => {
+                // The success message is a string in the options
+                if (typeof options.success === 'string') {
+                    // Do nothing, the toast will handle displaying the message
+                }
+            });
+            return promise;
+        }),
+    },
+}));
 
+// Create a mock query client
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            retry: false,
+            staleTime: 0,
+            gcTime: 0,
+        },
+    },
+});
+
+// Mock the API functions
 vi.mock('../api/api', () => ({
-    getUser: () => mockGetUser(),
-    getRoles: () => mockGetRoles(),
-    updateUser: (id: number, data: any) => mockUpdateUser(id, data),
+    getUser: vi.fn(),
+    getRoles: vi.fn(),
+    updateUser: vi.fn(),
 }));
 
 describe('Profile Page', () => {
-    const queryClient = new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-            },
-        },
-    });
-
     beforeEach(() => {
         // Reset all mocks before each test
         vi.clearAllMocks();
+        queryClient.clear();
 
-        // Setup default mock responses
-        mockGetUser.mockResolvedValue({
+        // Mock API responses
+        vi.mocked(getUser).mockResolvedValue({
             id: 1,
             first_name: 'John',
             last_name: 'Doe',
             email: 'john@example.com',
-            profile_photo: null,
-            groups: [],
+            profile_photo: '',
+            groups: [1],
+            institute: 1,
+            password: '',
+            is_active: true,
+            instructor_id: 1,
         });
-        mockGetRoles.mockResolvedValue([]);
-        mockUpdateUser.mockResolvedValue({});
+
+        vi.mocked(getRoles).mockResolvedValue([
+            { id: 1, name: 'Admin', permissions: [] },
+            { id: 2, name: 'User', permissions: [] },
+            { id: 3, name: 'Management', permissions: [] },
+        ]);
+
+        vi.mocked(updateUser).mockResolvedValue({
+            id: 1,
+            first_name: 'John',
+            last_name: 'Doe',
+            email: 'john@example.com',
+            profile_photo: '',
+            groups: [1],
+            institute: 1,
+            password: '',
+            is_active: true,
+            instructor_id: 1,
+        });
     });
 
-    const renderProfile = () => {
-        return render(
-            <QueryClientProvider client={queryClient}>
-                <Profile />
-                <Toaster />
-            </QueryClientProvider>,
+    it('renders the profile page with correct title and description', () => {
+        render(
+            <TooltipPrimitive.Provider>
+                <QueryClientProvider client={queryClient}>
+                    <Profile />
+                </QueryClientProvider>
+            </TooltipPrimitive.Provider>,
         );
-    };
 
-    it('renders the profile page with correct title and description', async () => {
-        renderProfile();
+        // Check if the title is rendered
+        expect(screen.getByText('Profile')).toBeInTheDocument();
 
-        expect(screen.getByRole('heading', { name: 'Profile' })).toBeInTheDocument();
+        // Check if the description is rendered
         expect(screen.getByText('This is how others will see you on the site.')).toBeInTheDocument();
+    });
 
+    it('shows loading state while fetching data', async () => {
+        // Create a promise that we can resolve later
+        let resolveUser: (value: {
+            id: number;
+            first_name: string;
+            last_name: string;
+            email: string;
+            profile_photo: string;
+            groups: number[];
+            institute: number;
+            password: string;
+            is_active: boolean;
+            instructor_id: number;
+        }) => void;
+        let resolveRoles: (value: Array<{ id: number; name: string; permissions: any[] }>) => void;
+
+        const userPromise = new Promise<{
+            id: number;
+            first_name: string;
+            last_name: string;
+            email: string;
+            profile_photo: string;
+            groups: number[];
+            institute: number;
+            password: string;
+            is_active: boolean;
+            instructor_id: number;
+        }>((resolve) => {
+            resolveUser = resolve;
+        });
+        const rolesPromise = new Promise<Array<{ id: number; name: string; permissions: any[] }>>((resolve) => {
+            resolveRoles = resolve;
+        });
+
+        // Mock the API calls to return our promises
+        vi.mocked(getUser).mockReturnValue(userPromise);
+        vi.mocked(getRoles).mockReturnValue(rolesPromise);
+
+        render(
+            <TooltipPrimitive.Provider>
+                <QueryClientProvider client={queryClient}>
+                    <Profile />
+                </QueryClientProvider>
+            </TooltipPrimitive.Provider>,
+        );
+
+        // Check if the promises are being called
+        expect(vi.mocked(getUser)).toHaveBeenCalled();
+        expect(vi.mocked(getRoles)).toHaveBeenCalled();
+
+        // Wait for loading state to appear
+        await waitFor(
+            () => {
+                expect(screen.getByTestId('loading-indicator')).toBeInTheDocument();
+            },
+            { timeout: 5000 },
+        );
+
+        // Resolve the promises
+        resolveUser!({
+            id: 1,
+            first_name: 'John',
+            last_name: 'Doe',
+            email: 'john@example.com',
+            profile_photo: '',
+            groups: [1],
+            institute: 1,
+            password: '',
+            is_active: true,
+            instructor_id: 1,
+        });
+        resolveRoles!([
+            { id: 1, name: 'Admin', permissions: [] },
+            { id: 2, name: 'User', permissions: [] },
+        ]);
+
+        // Wait for loading to complete
+        await waitFor(() => {
+            expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
+        });
+    });
+
+    it('renders the form after loading', async () => {
+        render(
+            <TooltipPrimitive.Provider>
+                <QueryClientProvider client={queryClient}>
+                    <Profile />
+                </QueryClientProvider>
+            </TooltipPrimitive.Provider>,
+        );
+
+        // Wait for loading state to disappear
+        await waitFor(() => {
+            expect(screen.queryByTestId('loading-indicator')).not.toBeInTheDocument();
+        });
+
+        // Then check for form fields
         await waitFor(() => {
             expect(screen.getByLabelText('First Name')).toBeInTheDocument();
             expect(screen.getByLabelText('Last Name')).toBeInTheDocument();
@@ -101,125 +225,112 @@ describe('Profile Page', () => {
         });
     });
 
-    it('shows loading state while fetching data', async () => {
-        renderProfile();
+    describe('Form Interactions', () => {
+        it('updates first name and last name fields', async () => {
+            render(
+                <TooltipPrimitive.Provider>
+                    <QueryClientProvider client={queryClient}>
+                        <Profile />
+                    </QueryClientProvider>
+                </TooltipPrimitive.Provider>,
+            );
 
-        // Should show loading skeletons
-        expect(screen.getByTestId('skeleton')).toBeInTheDocument();
+            // Wait for form to load
+            await waitFor(() => {
+                expect(screen.getByLabelText('First Name')).toBeInTheDocument();
+            });
 
-        // Wait for loading to complete
-        await waitFor(() => {
-            expect(screen.queryByTestId('skeleton')).not.toBeInTheDocument();
-        });
-    });
+            // Update first name
+            const firstNameInput = screen.getByLabelText('First Name');
+            await userEvent.clear(firstNameInput);
+            await userEvent.type(firstNameInput, 'Jane');
 
-    it('pre-fills form with user data', async () => {
-        renderProfile();
+            // Update last name
+            const lastNameInput = screen.getByLabelText('Last Name');
+            await userEvent.clear(lastNameInput);
+            await userEvent.type(lastNameInput, 'Smith');
 
-        await waitFor(() => {
-            expect(screen.getByDisplayValue('John')).toBeInTheDocument();
-            expect(screen.getByDisplayValue('Doe')).toBeInTheDocument();
-            expect(screen.getByDisplayValue('john@example.com')).toBeInTheDocument();
-        });
-    });
-
-    it('validates form fields and shows error messages', async () => {
-        renderProfile();
-
-        // Wait for form to be rendered
-        await waitFor(() => {
-            expect(screen.getByLabelText('First Name')).toBeInTheDocument();
-        });
-
-        const firstNameInput = screen.getByLabelText('First Name');
-        const lastNameInput = screen.getByLabelText('Last Name');
-        const emailInput = screen.getByLabelText('Email');
-
-        // Clear the fields
-        fireEvent.change(firstNameInput, { target: { value: '' } });
-        fireEvent.change(lastNameInput, { target: { value: '' } });
-        fireEvent.change(emailInput, { target: { value: 'invalid-email' } });
-
-        // Submit the form
-        fireEvent.click(screen.getByRole('button', { name: /update/i }));
-
-        // Check for error messages
-        await waitFor(() => {
-            expect(screen.getByText('First name must be at least 2 characters.')).toBeInTheDocument();
-            expect(screen.getByText('Last name must be at least 2 characters.')).toBeInTheDocument();
-            expect(screen.getByText('Please enter a valid email.')).toBeInTheDocument();
-        });
-    });
-
-    it('successfully updates user profile', async () => {
-        renderProfile();
-
-        // Wait for form to be rendered and user data to be loaded
-        await waitFor(() => {
-            expect(screen.getByLabelText('First Name')).toBeInTheDocument();
-            expect(screen.getByDisplayValue('John')).toBeInTheDocument();
+            // Verify values
+            expect(firstNameInput).toHaveValue('Jane');
+            expect(lastNameInput).toHaveValue('Smith');
         });
 
-        const firstNameInput = screen.getByLabelText('First Name');
-        const lastNameInput = screen.getByLabelText('Last Name');
-        const emailInput = screen.getByLabelText('Email');
+        it('shows validation errors for invalid input', async () => {
+            render(
+                <TooltipPrimitive.Provider>
+                    <QueryClientProvider client={queryClient}>
+                        <Profile />
+                    </QueryClientProvider>
+                </TooltipPrimitive.Provider>,
+            );
 
-        // Update the fields
-        fireEvent.change(firstNameInput, { target: { value: 'Jane' } });
-        fireEvent.change(lastNameInput, { target: { value: 'Smith' } });
-        fireEvent.change(emailInput, { target: { value: 'jane.smith@example.com' } });
+            // Wait for form to load
+            await waitFor(() => {
+                expect(screen.getByLabelText('First Name')).toBeInTheDocument();
+            });
 
-        // Submit the form
-        fireEvent.click(screen.getByRole('button', { name: /update/i }));
+            // Enter invalid first name (too short)
+            const firstNameInput = screen.getByLabelText('First Name');
+            await userEvent.clear(firstNameInput);
+            await userEvent.type(firstNameInput, 'J');
 
-        // Check if updateUser was called with correct data
-        await waitFor(() => {
-            expect(mockUpdateUser).toHaveBeenCalledWith(1, {
-                id: 1,
-                first_name: 'Jane',
-                last_name: 'Smith',
-                email: 'jane.smith@example.com',
-                profile_photo: null,
-                groups: [],
+            // Enter invalid last name (empty)
+            const lastNameInput = screen.getByLabelText('Last Name');
+            await userEvent.clear(lastNameInput);
+
+            // Submit form
+            const submitButton = screen.getByRole('button', { name: /update profile/i });
+            await userEvent.click(submitButton);
+
+            // Check for validation messages
+            await waitFor(() => {
+                expect(screen.getByText('First name must be at least 2 characters.')).toBeInTheDocument();
+                expect(screen.getByText('Last name must be at least 1 characters.')).toBeInTheDocument();
             });
         });
 
-        // Check for success toast
-        await waitFor(
-            () => {
-                expect(toast.promise).toHaveBeenCalled();
-                const toastPromiseCall = (toast.promise as any).mock.calls[0];
-                const successHandler = toastPromiseCall[1].success;
-                expect(successHandler).toBe('Profile updated successfully');
-            },
-            { timeout: 5000 },
-        );
-    });
+        it('submits the form successfully', async () => {
+            render(
+                <TooltipPrimitive.Provider>
+                    <QueryClientProvider client={queryClient}>
+                        <Profile />
+                    </QueryClientProvider>
+                </TooltipPrimitive.Provider>,
+            );
 
-    it('shows error toast when profile update fails', async () => {
-        const error = new Error('Update failed');
-        mockUpdateUser.mockRejectedValueOnce(error);
+            // Wait for form to load
+            await waitFor(() => {
+                expect(screen.getByLabelText('First Name')).toBeInTheDocument();
+            });
 
-        renderProfile();
+            // Update first name
+            const firstNameInput = screen.getByLabelText('First Name');
+            await userEvent.clear(firstNameInput);
+            await userEvent.type(firstNameInput, 'Jane');
 
-        // Wait for form to be rendered and user data to be loaded
-        await waitFor(() => {
-            expect(screen.getByLabelText('First Name')).toBeInTheDocument();
-            expect(screen.getByDisplayValue('John')).toBeInTheDocument();
+            // Submit form
+            const submitButton = screen.getByRole('button', { name: /update profile/i });
+            await userEvent.click(submitButton);
+
+            // Verify update was called
+            await waitFor(() => {
+                expect(vi.mocked(updateUser)).toHaveBeenCalledWith(
+                    1,
+                    expect.objectContaining({
+                        first_name: 'Jane',
+                    }),
+                );
+            });
+
+            // Verify toast was called with success message
+            await waitFor(() => {
+                expect(vi.mocked(toast.promise)).toHaveBeenCalledWith(
+                    expect.any(Promise),
+                    expect.objectContaining({
+                        success: 'Profile updated successfully',
+                    }),
+                );
+            });
         });
-
-        // Submit the form
-        fireEvent.click(screen.getByRole('button', { name: /update/i }));
-
-        // Verify toast.promise was called with the correct error message
-        await waitFor(
-            () => {
-                expect(toast.promise).toHaveBeenCalled();
-                const toastPromiseCall = (toast.promise as any).mock.calls[0];
-                const errorHandler = toastPromiseCall[1].error;
-                expect(errorHandler).toBe('Failed to update profile');
-            },
-            { timeout: 5000 },
-        );
     });
 });

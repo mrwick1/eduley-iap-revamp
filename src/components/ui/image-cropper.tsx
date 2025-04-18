@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useRef, useState } from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { Button } from './button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from './dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from './dialog';
 import { Spinner } from './spinner';
 import 'react-image-crop/dist/ReactCrop.css';
 import { X } from 'lucide-react';
@@ -155,6 +155,9 @@ export function ImageCropper({ aspectRatio = 1, onCrop, trigger, className }: Im
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Crop Image</DialogTitle>
+                    <DialogDescription>
+                        Upload and crop your image. You can adjust the crop area by dragging the corners or edges.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
                     <div className="flex items-center justify-center">
@@ -213,43 +216,45 @@ export function ImageCropper({ aspectRatio = 1, onCrop, trigger, className }: Im
                             )}
                         </div>
                     </div>
-                    <div className="relative min-h-[300px]">
-                        {isLoading && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
-                                <Spinner size="md" variant="light" />
-                            </div>
-                        )}
-                        {croppedImageUrl ? (
-                            <div className="flex items-center justify-center w-full h-[300px]">
-                                <img
-                                    src={croppedImageUrl}
-                                    alt="Cropped preview"
-                                    className="h-full w-full object-contain"
-                                />
-                            </div>
-                        ) : imgSrc ? (
-                            <ReactCrop
-                                crop={crop}
-                                onChange={onCropChange}
-                                onComplete={onCropComplete}
-                                aspect={aspectRatio}
-                            >
-                                <img
-                                    ref={imgRef}
-                                    alt="Crop me"
-                                    src={imgSrc}
-                                    onLoad={onImageLoad}
-                                    className="max-h-[300px] w-auto"
-                                />
-                            </ReactCrop>
-                        ) : null}
-                        <canvas
-                            ref={previewCanvasRef}
-                            style={{
-                                display: 'none',
-                            }}
-                        />
-                    </div>
+                    {(croppedImageUrl || imgSrc) && (
+                        <div className="relative min-h-[300px]">
+                            {isLoading && (
+                                <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
+                                    <Spinner size="md" variant="light" />
+                                </div>
+                            )}
+                            {croppedImageUrl ? (
+                                <div className="flex items-center justify-center w-full h-[300px]">
+                                    <img
+                                        src={croppedImageUrl}
+                                        alt="Cropped preview"
+                                        className="h-full w-full object-contain"
+                                    />
+                                </div>
+                            ) : imgSrc ? (
+                                <ReactCrop
+                                    crop={crop}
+                                    onChange={onCropChange}
+                                    onComplete={onCropComplete}
+                                    aspect={aspectRatio}
+                                >
+                                    <img
+                                        ref={imgRef}
+                                        alt="Crop me"
+                                        src={imgSrc}
+                                        onLoad={onImageLoad}
+                                        className="max-h-[300px] w-auto"
+                                    />
+                                </ReactCrop>
+                            ) : null}
+                            <canvas
+                                ref={previewCanvasRef}
+                                style={{
+                                    display: 'none',
+                                }}
+                            />
+                        </div>
+                    )}
                     <div className="flex justify-end gap-2">
                         <Button variant="outline" onClick={handleClear}>
                             Cancel

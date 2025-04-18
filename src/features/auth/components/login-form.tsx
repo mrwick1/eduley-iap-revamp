@@ -35,7 +35,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         });
         promise
             .then(() => {
-                navigate({ to: '/' });
+                navigate({ to: '/dashboard' });
             })
             .catch(() => {
                 // Handle the error silently as it's already shown in the toast

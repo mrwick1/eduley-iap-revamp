@@ -1,12 +1,12 @@
-import Settings from '@/features/user/settings-page';
+import Settings from '@/features/settings';
 import { createRoute } from '@tanstack/react-router';
-import { indexRoute } from '..';
+import { rootRoute } from '..';
 import Profile from '@/features/settings/account/profile-page';
 
 export const settingsRoute = createRoute({
     path: '/settings',
     component: Settings,
-    getParentRoute: () => indexRoute,
+    getParentRoute: () => rootRoute,
 });
 
 export const profileRoute = createRoute({
