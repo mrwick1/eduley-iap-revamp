@@ -1,9 +1,22 @@
-import LoginPage from '@/features/auth/login-page';
 import { createRoute } from '@tanstack/react-router';
 import { rootRoute } from '..';
+import { lazy, Suspense } from 'react';
+import { Spinner } from '@/components/ui/spinner';
+
+const Login = lazy(() => import('@/features/auth/login-page'));
 
 export const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: 'auth/login',
-    component: () => <LoginPage />,
+    component: () => (
+        <Suspense
+            fallback={
+                <div className="flex h-screen items-center justify-center">
+                    <Spinner size="lg" />
+                </div>
+            }
+        >
+            <Login />
+        </Suspense>
+    ),
 });

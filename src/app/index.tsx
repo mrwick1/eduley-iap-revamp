@@ -2,8 +2,8 @@ import { createRouter, createRoute, createRootRoute } from '@tanstack/react-rout
 import { Layout } from '../layout/layout';
 import '@/index.css';
 import { loginRoute } from './routes/login-route';
-import NotFoundError from '@/features/errors/not-found-error';
-import GeneralError from '@/features/errors/general-error';
+import NotFoundError from '@/components/errors/not-found-error';
+import GeneralError from '@/components/errors/general-error';
 import { profileRoute, settingsRoute } from './routes/settings-route';
 import { dashboardRoute } from './routes/dashboard-route';
 import { Navigate } from '@tanstack/react-router';
