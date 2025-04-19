@@ -2,10 +2,10 @@ import { createRoute } from '@tanstack/react-router';
 import { rootRoute } from '..';
 import { lazy, Suspense } from 'react';
 import { Spinner } from '@/components/ui/spinner';
-import Profile from '@/features/settings/account/profile-page';
-import AppearancePage from '@/features/settings/appearance/appearance-page';
 
 const Settings = lazy(() => import('@/features/settings'));
+const Profile = lazy(() => import('@/features/settings/account/profile-page'));
+const AppearancePage = lazy(() => import('@/features/settings/appearance/appearance-page'));
 
 export const settingsRoute = createRoute({
     getParentRoute: () => rootRoute,
