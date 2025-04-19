@@ -106,16 +106,19 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
   }
-  html {
-    @apply overflow-x-hidden;
-  }
+  
   body {
+    @apply bg-background text-foreground ;
+  }
+  .body-class {
     @apply bg-background text-foreground min-h-svh w-full;
   }
 

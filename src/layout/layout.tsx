@@ -11,9 +11,9 @@ export function Layout() {
 
     return (
         <AppProvider>
-            {isAuthenticated ? (
-                <ProtectedRoute>
-                    <SearchProvider>
+            <SearchProvider>
+                {isAuthenticated ? (
+                    <ProtectedRoute>
                         <SidebarProvider>
                             <AppSidebar />
                             <SidebarInset id="content">
@@ -22,11 +22,11 @@ export function Layout() {
                                 </div>
                             </SidebarInset>
                         </SidebarProvider>
-                    </SearchProvider>
-                </ProtectedRoute>
-            ) : (
-                <Outlet />
-            )}
+                    </ProtectedRoute>
+                ) : (
+                    <Outlet />
+                )}
+            </SearchProvider>
         </AppProvider>
     );
 }

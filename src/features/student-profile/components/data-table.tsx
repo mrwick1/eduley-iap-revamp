@@ -2,6 +2,7 @@ import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRow
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DataTablePagination } from './table-pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DataTableToolbar } from './data-toolbar';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -12,6 +13,11 @@ interface DataTableProps<TData, TValue> {
     onPageSizeChange: (size: number) => void;
     totalCount: number;
     isLoading?: boolean;
+    filter: {
+        search: string;
+        status: string;
+    };
+    onFilterChange: (filter: { search: string; status: string }) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -23,6 +29,8 @@ export function DataTable<TData, TValue>({
     onPageSizeChange,
     totalCount,
     isLoading = false,
+    filter,
+    onFilterChange,
 }: DataTableProps<TData, TValue>) {
     const table = useReactTable({
         data,
@@ -36,6 +44,10 @@ export function DataTable<TData, TValue>({
                 pageIndex,
                 pageSize,
             },
+            columnFilters: [
+                { id: 'name', value: filter.search },
+                { id: 'profileStatus', value: filter.status },
+            ],
         },
         onPaginationChange: (updater) => {
             if (typeof updater === 'function') {
@@ -44,10 +56,22 @@ export function DataTable<TData, TValue>({
                 onPageSizeChange(newState.pageSize);
             }
         },
+        onColumnFiltersChange: (updater) => {
+            if (typeof updater === 'function') {
+                const newFilters = updater([
+                    { id: 'name', value: filter.search },
+                    { id: 'profileStatus', value: filter.status },
+                ]);
+                const search = (newFilters.find((f) => f.id === 'name')?.value as string) || '';
+                const status = (newFilters.find((f) => f.id === 'profileStatus')?.value as string) || '';
+                onFilterChange({ search, status });
+            }
+        },
     });
 
     return (
         <div className="space-y-4">
+            <DataTableToolbar table={table} />
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
@@ -70,7 +94,6 @@ export function DataTable<TData, TValue>({
                             Array.from({ length: pageSize }).map((_, index) => (
                                 <TableRow key={index}>
                                     {columns.map((column, colIndex) => {
-                                        // Custom skeleton dimensions based on column type
                                         const columnId = column.id || ((column as any).accessorKey as string);
                                         if (columnId === 'name') {
                                             return (

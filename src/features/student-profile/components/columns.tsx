@@ -3,6 +3,7 @@ import { StudentProfile } from '../types/types';
 import { CheckCircle2, Clock, Eye, Info } from 'lucide-react';
 import { Tooltip } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const columns: ColumnDef<StudentProfile>[] = [
     {
@@ -24,17 +25,26 @@ export const columns: ColumnDef<StudentProfile>[] = [
         ),
         accessorKey: 'name',
         cell: ({ row }) => {
-            const { full_name, email } = row.original;
+            const { full_name, email, profile_photo, first_name, last_name } = row.original;
             return (
-                <div className="flex flex-col gap-2">
-                    {full_name ? (
-                        <>
-                            <p className="text-sm font-medium">{full_name}</p>
-                            <p className="text-xs text-muted-foreground">{email}</p>
-                        </>
-                    ) : (
-                        <p className="text-sm font-medium">{email}</p>
-                    )}
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={profile_photo || undefined} alt={full_name || email} />
+                        <AvatarFallback>
+                            {first_name?.[0]?.toUpperCase()}
+                            {last_name?.[0]?.toUpperCase() || email?.[0].toUpperCase()}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col gap-1">
+                        {full_name ? (
+                            <>
+                                <p className="text-sm font-medium">{full_name}</p>
+                                <p className="text-xs text-muted-foreground">{email}</p>
+                            </>
+                        ) : (
+                            <p className="text-sm font-medium">{email}</p>
+                        )}
+                    </div>
                 </div>
             );
         },
