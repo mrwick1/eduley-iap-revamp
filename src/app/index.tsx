@@ -4,7 +4,7 @@ import '@/index.css';
 import { loginRoute } from './routes/login-route';
 import NotFoundError from '@/components/errors/not-found-error';
 import GeneralError from '@/components/errors/general-error';
-import { profileRoute, settingsRoute } from './routes/settings-route';
+import { appearanceRoute, profileRoute, settingsRoute } from './routes/settings-route';
 import { dashboardRoute } from './routes/dashboard-route';
 import { Navigate } from '@tanstack/react-router';
 import { studentProfileRoute } from './routes/student-profile-route';
@@ -27,7 +27,7 @@ const routeTree = rootRoute.addChildren([
     indexRoute,
     loginRoute,
     dashboardRoute,
-    settingsRoute.addChildren([profileRoute]),
+    settingsRoute.addChildren([profileRoute, appearanceRoute]),
     studentProfileRoute,
 ]);
 

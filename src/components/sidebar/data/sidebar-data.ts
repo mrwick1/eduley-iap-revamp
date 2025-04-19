@@ -105,27 +105,27 @@ export const sidebarData: SidebarData = {
                     items: [
                         {
                             title: 'Profile',
-                            url: '/',
+                            url: '/settings/profile',
                             icon: IconUserCog,
                         },
                         {
                             title: 'Account',
-                            url: '/',
+                            url: '/settings',
                             icon: IconTool,
                         },
                         {
                             title: 'Appearance',
-                            url: '/',
+                            url: '/settings/appearance',
                             icon: IconPalette,
                         },
                         {
                             title: 'Notifications',
-                            url: '/',
+                            url: '/settings',
                             icon: IconNotification,
                         },
                         {
                             title: 'Display',
-                            url: '/',
+                            url: '/settings',
                             icon: IconBrowserCheck,
                         },
                     ],

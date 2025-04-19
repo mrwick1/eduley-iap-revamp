@@ -8,6 +8,9 @@ const Login = lazy(() => import('@/features/auth/login-page'));
 export const loginRoute = createRoute({
     getParentRoute: () => rootRoute,
     path: 'auth/login',
+    validateSearch: (search: Record<string, unknown>) => ({
+        redirectTo: search.redirectTo as string | undefined,
+    }),
     component: () => (
         <Suspense
             fallback={

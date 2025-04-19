@@ -7,9 +7,10 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { AuthLoader } from '@/lib/auth';
 import { Toaster } from 'sonner';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
-import { CatchBoundary } from '@tanstack/react-router';
 import { NavigationProgress } from '@/components/navigation-progress';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import { FontProvider } from '@/context/font-context';
+import { ThemeProvider } from '@/context/theme-context';
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = useState(
@@ -20,43 +21,40 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     );
 
     return (
-        <CatchBoundary
-            getResetKey={() => window.location.pathname}
-            onCatch={(error) => {
-                console.error('Error caught by CatchBoundary:', error);
-            }}
+        <Suspense
+            fallback={
+                <div className="flex h-screen w-screen items-center justify-center">
+                    <Spinner size="xl" />
+                </div>
+            }
         >
-            <Suspense
-                fallback={
-                    <div className="flex h-screen w-screen items-center justify-center">
-                        <Spinner size="xl" />
-                    </div>
-                }
-            >
-                <HelmetProvider>
-                    <QueryClientProvider client={queryClient}>
-                        {import.meta.env.DEV && (
-                            <>
-                                <ReactQueryDevtools />
-                                <TanStackRouterDevtools />
-                            </>
-                        )}
-                        <AuthLoader
-                            renderLoading={() => (
-                                <div className="flex h-screen w-screen items-center justify-center">
-                                    <Spinner size="xl" />
-                                </div>
-                            )}
-                        >
-                            <TooltipPrimitive.Provider delayDuration={100}>
-                                <NavigationProgress />
-                                {children}
-                            </TooltipPrimitive.Provider>
-                        </AuthLoader>
-                        <Toaster richColors position="top-right" duration={2000} closeButton />
-                    </QueryClientProvider>
-                </HelmetProvider>
-            </Suspense>
-        </CatchBoundary>
+            <HelmetProvider>
+                <QueryClientProvider client={queryClient}>
+                    {import.meta.env.DEV && (
+                        <>
+                            <ReactQueryDevtools />
+                            <TanStackRouterDevtools />
+                        </>
+                    )}
+                    <ThemeProvider>
+                        <FontProvider>
+                            <AuthLoader
+                                renderLoading={() => (
+                                    <div className="flex h-screen w-screen items-center justify-center">
+                                        <Spinner size="xl" />
+                                    </div>
+                                )}
+                            >
+                                <TooltipPrimitive.Provider delayDuration={100}>
+                                    <NavigationProgress />
+                                    {children}
+                                </TooltipPrimitive.Provider>
+                            </AuthLoader>
+                        </FontProvider>
+                    </ThemeProvider>
+                    <Toaster richColors position="top-right" duration={2000} closeButton />
+                </QueryClientProvider>
+            </HelmetProvider>
+        </Suspense>
     );
 };

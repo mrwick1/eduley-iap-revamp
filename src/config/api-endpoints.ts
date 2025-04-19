@@ -7,4 +7,5 @@ export const apiEndpoints = {
     iapUser: '/iap/user/:id/',
     institute: '/institute/admin/institute/',
     studentList: '/iap/report/student/',
+    studentProfileDownloadExcel: '/iap/report/student/download_excel/',
 };

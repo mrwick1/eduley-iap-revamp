@@ -3,6 +3,7 @@ import { rootRoute } from '..';
 import { lazy, Suspense } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import Profile from '@/features/settings/account/profile-page';
+import AppearancePage from '@/features/settings/appearance/appearance-page';
 
 const Settings = lazy(() => import('@/features/settings'));
 
@@ -25,5 +26,11 @@ export const settingsRoute = createRoute({
 export const profileRoute = createRoute({
     path: 'profile/',
     component: Profile,
+    getParentRoute: () => settingsRoute,
+});
+
+export const appearanceRoute = createRoute({
+    path: 'appearance/',
+    component: AppearancePage,
     getParentRoute: () => settingsRoute,
 });

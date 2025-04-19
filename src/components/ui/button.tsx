@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Loader2 } from 'lucide-react';
-
+import { Loader2, InfoIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tooltip } from './tooltip';
 
 const buttonVariants = cva(
     "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -33,35 +33,75 @@ const buttonVariants = cva(
     },
 );
 
-const Button = React.forwardRef<
-    HTMLButtonElement,
-    React.ComponentProps<'button'> &
-        VariantProps<typeof buttonVariants> & {
-            asChild?: boolean;
-            loading?: boolean;
-        }
->(({ className, variant, size, asChild = false, loading = false, children, ...props }, ref) => {
-    const Comp = asChild ? Slot : 'button';
+interface ButtonProps extends React.ComponentProps<'button'>, VariantProps<typeof buttonVariants> {
+    asChild?: boolean;
+    loading?: boolean;
+    infoMessage?: string;
+    disabledMessage?: string;
+}
 
-    return (
-        <Comp
-            ref={ref}
-            data-slot="button"
-            className={cn(buttonVariants({ variant, size, className }))}
-            disabled={loading}
-            {...props}
-        >
-            {loading ? (
-                <>
-                    <Loader2 className="animate-spin" data-testid="loader" />
-                    {children}
-                </>
-            ) : (
-                children
-            )}
-        </Comp>
-    );
-});
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+    (
+        {
+            className,
+            variant,
+            size,
+            asChild = false,
+            loading = false,
+            children,
+            infoMessage,
+            disabledMessage,
+            disabled,
+            ...props
+        },
+        ref,
+    ) => {
+        const Comp = asChild ? Slot : 'button';
+        const isDisabled = disabled || loading;
+        const showInfoIcon = disabledMessage || infoMessage;
+        const tooltipMessage = isDisabled ? disabledMessage : infoMessage;
+
+        return (
+            <div className="relative">
+                <Comp
+                    ref={ref}
+                    data-slot="button"
+                    className={cn(
+                        buttonVariants({ variant, size, className }),
+                        showInfoIcon && 'pr-4',
+                        isDisabled && 'pointer-events-none',
+                    )}
+                    disabled={isDisabled}
+                    {...props}
+                >
+                    {loading ? (
+                        <>
+                            <Loader2 className="animate-spin" data-testid="loader" />
+                            {children}
+                        </>
+                    ) : (
+                        <>
+                            {children}
+                            {showInfoIcon && (
+                                <Tooltip message={tooltipMessage}>
+                                    <div
+                                        role="button"
+                                        tabIndex={0}
+                                        className="text-muted-foreground hover:text-foreground cursor-help pointer-events-auto"
+                                        onClick={(e) => e.stopPropagation()}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                    >
+                                        <InfoIcon className="size-4" />
+                                    </div>
+                                </Tooltip>
+                            )}
+                        </>
+                    )}
+                </Comp>
+            </div>
+        );
+    },
+);
 
 Button.displayName = 'Button';
 

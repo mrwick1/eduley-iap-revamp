@@ -18,7 +18,19 @@ function Tooltip({ children, message, isVisible = true, side = 'top', className 
 
     return (
         <TooltipPrimitive.Root>
-            <TooltipPrimitive.Trigger asChild>{children}</TooltipPrimitive.Trigger>
+            <TooltipPrimitive.Trigger asChild>
+                <div
+                    onTouchStart={(e) => {
+                        // Prevent tooltip from showing on touch if the element is a button or link
+                        if (e.target instanceof HTMLButtonElement || e.target instanceof HTMLAnchorElement) {
+                            return;
+                        }
+                        e.preventDefault();
+                    }}
+                >
+                    {children}
+                </div>
+            </TooltipPrimitive.Trigger>
             <TooltipPrimitive.Portal>
                 <TooltipPrimitive.Content
                     data-slot="tooltip-content"

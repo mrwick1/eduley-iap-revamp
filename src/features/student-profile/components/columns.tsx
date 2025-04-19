@@ -17,7 +17,7 @@ export const columns: ColumnDef<StudentProfile>[] = [
     {
         header: () => (
             <div className="flex items-center gap-2">
-                <span>Name & Email</span>
+                <span>Student</span>
                 <Tooltip message="Student's name and email address. Name might be null for some students.">
                     <Info className="h-4 w-4 text-muted-foreground" />
                 </Tooltip>

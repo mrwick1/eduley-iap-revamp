@@ -7,7 +7,7 @@ import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { z } from 'zod';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useSearch } from '@tanstack/react-router';
 import { Card, CardContent } from '@/components/ui/card';
 import loginBg from '@/assets/images/login-bg.jpg';
 const loginInputSchema = z.object({
@@ -18,6 +18,7 @@ const loginInputSchema = z.object({
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
     const { isPending, mutateAsync: login } = useLogin();
     const navigate = useNavigate();
+    const { redirectTo } = useSearch({ from: '/auth/login' });
     const {
         register,
         handleSubmit,
@@ -35,7 +36,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         });
         promise
             .then(() => {
-                navigate({ to: '/dashboard' });
+                navigate({ to: redirectTo || '/dashboard' });
             })
             .catch(() => {
                 // Handle the error silently as it's already shown in the toast

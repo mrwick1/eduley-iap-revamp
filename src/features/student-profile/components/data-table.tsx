@@ -1,8 +1,15 @@
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable, getPaginationRowModel } from '@tanstack/react-table';
+import {
+    ColumnDef,
+    flexRender,
+    getCoreRowModel,
+    useReactTable,
+    getPaginationRowModel,
+    VisibilityState,
+} from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DataTablePagination } from './table-pagination';
 import { Skeleton } from '@/components/ui/skeleton';
-import { DataTableToolbar } from './data-toolbar';
+import { DataTableToolbar } from './table-toolbar';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -18,6 +25,8 @@ interface DataTableProps<TData, TValue> {
         status: string;
     };
     onFilterChange: (filter: { search: string; status: string }) => void;
+    columnVisibility: VisibilityState;
+    onColumnVisibilityChange: (visibility: VisibilityState) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -31,6 +40,8 @@ export function DataTable<TData, TValue>({
     isLoading = false,
     filter,
     onFilterChange,
+    columnVisibility,
+    onColumnVisibilityChange,
 }: DataTableProps<TData, TValue>) {
     const table = useReactTable({
         data,
@@ -44,6 +55,7 @@ export function DataTable<TData, TValue>({
                 pageIndex,
                 pageSize,
             },
+            columnVisibility,
             columnFilters: [
                 { id: 'name', value: filter.search },
                 { id: 'profileStatus', value: filter.status },
@@ -65,6 +77,12 @@ export function DataTable<TData, TValue>({
                 const search = (newFilters.find((f) => f.id === 'name')?.value as string) || '';
                 const status = (newFilters.find((f) => f.id === 'profileStatus')?.value as string) || '';
                 onFilterChange({ search, status });
+            }
+        },
+        onColumnVisibilityChange: (updater) => {
+            if (typeof updater === 'function') {
+                const newVisibility = updater(columnVisibility);
+                onColumnVisibilityChange(newVisibility);
             }
         },
     });
@@ -93,7 +111,7 @@ export function DataTable<TData, TValue>({
                         {isLoading ? (
                             Array.from({ length: pageSize }).map((_, index) => (
                                 <TableRow key={index}>
-                                    {columns.map((column, colIndex) => {
+                                    {table.getVisibleLeafColumns().map((column, colIndex) => {
                                         const columnId = column.id || ((column as any).accessorKey as string);
                                         if (columnId === 'name') {
                                             return (

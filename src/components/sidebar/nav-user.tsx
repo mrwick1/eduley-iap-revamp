@@ -13,21 +13,30 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { useLogout, useUser } from '@/lib/auth';
 import { toast } from 'sonner';
+import { tokenStorage } from '@/lib/token';
+import { useUserStore } from '@/store/userSlice';
+
 export function NavUser() {
     const { isMobile } = useSidebar();
     const logout = useLogout();
     const user = useUser();
     const navigate = useNavigate();
+    const { setUser, setAuthenticated } = useUserStore();
     const handleLogout = async () => {
+        console.log('Logging out...');
+
         const promise = logout.mutateAsync({});
         toast.promise(promise, {
             loading: 'Logging out...',
             success: 'Successfully logged out!',
             error: (err) => err.message || 'Failed to logout',
         });
-        promise.then(() => {
-            navigate({ to: '/auth/login' });
-        });
+        // Reset the store and clear tokens
+        setUser(null);
+        setAuthenticated(false);
+        tokenStorage.clearTokens();
+        // Navigate to login page
+        navigate({ to: '/auth/login', search: { redirectTo: undefined } });
     };
     return (
         <SidebarMenu>

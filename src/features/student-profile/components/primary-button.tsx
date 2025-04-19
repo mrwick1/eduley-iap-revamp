@@ -1,10 +1,16 @@
 import { Button } from '@/components/ui/button';
 import { IconDownload } from '@tabler/icons-react';
 
-export const StudentProfilePrimaryButtons = () => {
+export const StudentProfilePrimaryButtons = ({
+    isDownloading,
+    handleDownloadExcel,
+}: {
+    isDownloading: boolean;
+    handleDownloadExcel: () => void;
+}) => {
     return (
         <div className="flex gap-2 pb-2">
-            <Button variant="outline" className="space-x-1">
+            <Button variant="outline" className="space-x-1" onClick={handleDownloadExcel} loading={isDownloading}>
                 <span>Export Excel</span> <IconDownload size={18} />
             </Button>
         </div>

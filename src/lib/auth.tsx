@@ -2,10 +2,10 @@ import { configureAuth } from 'react-query-auth';
 import { z } from 'zod';
 import { api } from './api-client';
 import { User, useUserStore } from '../store/userSlice';
-import { useStore } from '../store';
+import { useStore } from '../store/useStore';
 import { TokenType, tokenStorage } from './token';
 import { apiEndpoints } from '@/config/api-endpoints';
-import { Navigate } from '@tanstack/react-router';
+import { Navigate, useLocation } from '@tanstack/react-router';
 import React from 'react';
 import { tryCatch } from '@/utils/try-catch';
 import { useInstituteStore } from '../store/instituteSlice';
@@ -130,9 +130,17 @@ export const { useUser, useLogin, useLogout, AuthLoader } = configureAuth({
 
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const { isAuthenticated, isLoading } = useUserStore();
+    const location = useLocation();
 
-    if (!isAuthenticated && !isLoading) {
-        return <Navigate to="/auth/login" />;
+    // If we're on an auth route, don't redirect
+    if (location.pathname.startsWith('/auth')) {
+        return children;
     }
+
+    // If not authenticated and not loading, redirect to login
+    if (!isAuthenticated && !isLoading) {
+        return <Navigate to="/auth/login" search={{ redirectTo: window.location.pathname }} />;
+    }
+
     return children;
 };
