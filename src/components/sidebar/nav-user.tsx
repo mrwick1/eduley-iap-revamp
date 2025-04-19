@@ -31,6 +31,7 @@ export function NavUser() {
             success: 'Successfully logged out!',
             error: (err) => err.message || 'Failed to logout',
         });
+        await promise;
         // Reset the store and clear tokens
         setUser(null);
         setAuthenticated(false);

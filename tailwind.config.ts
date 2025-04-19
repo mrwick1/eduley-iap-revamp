@@ -2,7 +2,14 @@ import type { Config } from 'tailwindcss';
 
 const config: Config = {
     darkMode: 'class',
-    content: ['./pages/**/*.{ts,tsx}', './components/**/*.{ts,tsx}', './app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
+    content: [
+        './pages/**/*.{ts,tsx}',
+        './components/**/*.{ts,tsx}',
+        './app/**/*.{ts,tsx}',
+        './src/**/*.{ts,tsx}',
+        './features/**/*.{ts,tsx}',
+        './layout/**/*.{ts,tsx}',
+    ],
     theme: {
         container: {
             center: true,
@@ -80,7 +87,7 @@ const config: Config = {
             },
         },
     },
-    plugins: [require('tailwindcss-animate')],
+    plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
 };
 
 export default config;

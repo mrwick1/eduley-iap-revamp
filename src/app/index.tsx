@@ -1,18 +1,34 @@
 import { createRouter, createRoute, createRootRoute } from '@tanstack/react-router';
-import { Layout } from '../layout/layout';
+import { LazyLoad } from '@/utils/lazy-load';
+import { lazy } from 'react';
 import '@/index.css';
-import { loginRoute } from './routes/login-route';
-import NotFoundError from '@/components/errors/not-found-error';
-import GeneralError from '@/components/errors/general-error';
-import { appearanceRoute, profileRoute, settingsRoute } from './routes/settings-route';
-import { dashboardRoute } from './routes/dashboard-route';
 import { Navigate } from '@tanstack/react-router';
+import { settingsRoute, profileRoute, appearanceRoute } from './routes/settings-route';
+import { loginRoute } from './routes/login-route';
+import { dashboardRoute } from './routes/dashboard-route';
 import { studentProfileRoute } from './routes/student-profile-route';
+
 // Root route with layout
+const Layout = lazy(() => import('@/layout/layout').then((m) => ({ default: m.Layout })));
+const NotFoundError = lazy(() => import('@/components/errors/not-found-error'));
+const GeneralError = lazy(() => import('@/components/errors/general-error'));
+
 export const rootRoute = createRootRoute({
-    component: Layout,
-    notFoundComponent: NotFoundError,
-    errorComponent: GeneralError,
+    component: () => (
+        <LazyLoad>
+            <Layout />
+        </LazyLoad>
+    ),
+    notFoundComponent: () => (
+        <LazyLoad>
+            <NotFoundError />
+        </LazyLoad>
+    ),
+    errorComponent: () => (
+        <LazyLoad>
+            <GeneralError />
+        </LazyLoad>
+    ),
 });
 
 // Index route that redirects to dashboard

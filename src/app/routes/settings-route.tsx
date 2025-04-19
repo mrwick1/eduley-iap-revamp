@@ -25,12 +25,32 @@ export const settingsRoute = createRoute({
 
 export const profileRoute = createRoute({
     path: 'profile/',
-    component: Profile,
     getParentRoute: () => settingsRoute,
+    component: () => (
+        <Suspense
+            fallback={
+                <div className="flex h-screen items-center justify-center">
+                    <Spinner size="lg" />
+                </div>
+            }
+        >
+            <Profile />
+        </Suspense>
+    ),
 });
 
 export const appearanceRoute = createRoute({
     path: 'appearance/',
-    component: AppearancePage,
     getParentRoute: () => settingsRoute,
+    component: () => (
+        <Suspense
+            fallback={
+                <div className="flex h-screen items-center justify-center">
+                    <Spinner size="lg" />
+                </div>
+            }
+        >
+            <AppearancePage />
+        </Suspense>
+    ),
 });
