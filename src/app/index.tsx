@@ -7,6 +7,7 @@ import { settingsRoute, profileRoute, appearanceRoute } from './routes/settings-
 import { loginRoute } from './routes/login-route';
 import { dashboardRoute } from './routes/dashboard-route';
 import { studentProfileRoute } from './routes/student-profile-route';
+import { staffRoute } from './routes/staff-route';
 
 // Root route with layout
 const Layout = lazy(() => import('@/layout/layout').then((m) => ({ default: m.Layout })));
@@ -45,6 +46,7 @@ const routeTree = rootRoute.addChildren([
     dashboardRoute,
     settingsRoute.addChildren([profileRoute, appearanceRoute]),
     studentProfileRoute,
+    staffRoute,
 ]);
 
 // Create the router

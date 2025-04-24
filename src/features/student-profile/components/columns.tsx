@@ -1,9 +1,10 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { StudentProfile } from '../types/types';
-import { CheckCircle2, Clock, Eye, Info } from 'lucide-react';
+import { Eye, Info } from 'lucide-react';
 import { Tooltip } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Status } from '@/components/ui/status';
 
 export const columns: ColumnDef<StudentProfile>[] = [
     {
@@ -82,11 +83,10 @@ export const columns: ColumnDef<StudentProfile>[] = [
             return (
                 <div className="flex w-[100px] items-center">
                     {profileStatus === 'Pending' ? (
-                        <Clock className="text-yellow-500 mr-2 h-4 w-4" />
+                        <Status text={profileStatus} status="warning" />
                     ) : (
-                        <CheckCircle2 className="text-green-500 mr-2 h-4 w-4" />
+                        <Status text={profileStatus} status="success" />
                     )}
-                    <span>{profileStatus}</span>
                 </div>
             );
         },

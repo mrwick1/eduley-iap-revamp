@@ -8,4 +8,6 @@ export const apiEndpoints = {
     institute: '/institute/admin/institute/',
     studentList: '/iap/report/student/',
     studentProfileDownloadExcel: '/iap/report/student/download_excel/',
+    staffList: '/iap/user/',
+    staffDownloadExcel: '/iap/user/download_excel/',
 };

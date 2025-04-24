@@ -5,6 +5,7 @@ import {
     IconLayoutDashboard,
     IconNotification,
     IconPalette,
+    IconSchool,
     IconSettings,
     IconTool,
     IconUserCog,
@@ -22,26 +23,11 @@ export const sidebarData: SidebarData = {
                     url: '/dashboard',
                     icon: IconLayoutDashboard,
                 },
-                // {
-                //     title: 'Tasks',
-                //     url: '/',
-                //     icon: IconChecklist,
-                // },
-                // {
-                //     title: 'Apps',
-                //     url: '/',
-                //     icon: IconPackages,
-                // },
-                // {
-                //     title: 'Chats',
-                //     url: '/',
-                //     badge: '3',
-                //     icon: IconMessages,
-                // },
+
                 {
                     title: 'Student Profile',
                     url: '/student-profile',
-                    icon: IconUsers,
+                    icon: IconSchool,
                 },
                 {
                     title: 'Payment Plan',
@@ -50,52 +36,17 @@ export const sidebarData: SidebarData = {
                 },
             ],
         },
-        // {
-        //     title: 'Pages',
-        //     items: [
-        //         {
-        //             title: 'Auth',
-        //             icon: IconLockAccess,
-        //             items: [
-        //                 {
-        //                     title: 'Sign In',
-        //                     url: '/',
-        //                 },
-        //             ],
-        //         },
-        //         {
-        //             title: 'Errors',
-        //             icon: IconBug,
-        //             items: [
-        //                 {
-        //                     title: 'Unauthorized',
-        //                     url: '/',
-        //                     icon: IconLock,
-        //                 },
-        //                 {
-        //                     title: 'Forbidden',
-        //                     url: '/',
-        //                     icon: IconUserOff,
-        //                 },
-        //                 {
-        //                     title: 'Not Found',
-        //                     url: '/',
-        //                     icon: IconError404,
-        //                 },
-        //                 {
-        //                     title: 'Internal Server Error',
-        //                     url: '/',
-        //                     icon: IconServerOff,
-        //                 },
-        //                 {
-        //                     title: 'Maintenance Error',
-        //                     url: '/',
-        //                     icon: IconBarrierBlock,
-        //                 },
-        //             ],
-        //         },
-        //     ],
-        // },
+        {
+            title: 'Management',
+            items: [
+                {
+                    title: 'Staff Management',
+                    url: '/staff-management',
+                    icon: IconUsers,
+                },
+            ],
+        },
+
         {
             title: 'Other',
             items: [

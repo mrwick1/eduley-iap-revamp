@@ -5,11 +5,14 @@ import {
     useReactTable,
     getPaginationRowModel,
     VisibilityState,
+    SortingState,
+    getSortedRowModel,
 } from '@tanstack/react-table';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DataTableToolbar } from './table-toolbar';
 import { DataTablePagination } from '@/components/table/table-pagination';
+import { useState } from 'react';
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
@@ -23,8 +26,10 @@ interface DataTableProps<TData, TValue> {
     filter: {
         search: string;
         status: string;
+        role: string;
+        ordering: string;
     };
-    onFilterChange: (filter: { search: string; status: string }) => void;
+    onFilterChange: (filter: { search: string; status: string; role: string; ordering: string }) => void;
     columnVisibility: VisibilityState;
     onColumnVisibilityChange: (visibility: VisibilityState) => void;
 }
@@ -43,11 +48,14 @@ export function DataTable<TData, TValue>({
     columnVisibility,
     onColumnVisibilityChange,
 }: DataTableProps<TData, TValue>) {
+    const [sorting, setSorting] = useState<SortingState>([]);
+
     const table = useReactTable({
         data,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
         pageCount: Math.ceil(totalCount / pageSize),
         manualPagination: true,
         state: {
@@ -55,11 +63,29 @@ export function DataTable<TData, TValue>({
                 pageIndex,
                 pageSize,
             },
+            sorting,
             columnVisibility,
             columnFilters: [
                 { id: 'name', value: filter.search },
-                { id: 'profileStatus', value: filter.status },
+                { id: 'status', value: filter.status },
+                { id: 'role', value: filter.role },
+                { id: 'ordering', value: filter.ordering },
             ],
+        },
+        onSortingChange: (updater) => {
+            if (typeof updater === 'function') {
+                const newSorting = updater(sorting);
+                setSorting(newSorting);
+
+                // Convert sorting state to ordering string
+                if (newSorting.length > 0) {
+                    const { id, desc } = newSorting[0];
+                    const ordering = desc ? `-${id}` : id;
+                    onFilterChange({ ...filter, ordering });
+                } else {
+                    onFilterChange({ ...filter, ordering: '' });
+                }
+            }
         },
         onPaginationChange: (updater) => {
             if (typeof updater === 'function') {
@@ -72,11 +98,15 @@ export function DataTable<TData, TValue>({
             if (typeof updater === 'function') {
                 const newFilters = updater([
                     { id: 'name', value: filter.search },
-                    { id: 'profileStatus', value: filter.status },
+                    { id: 'status', value: filter.status },
+                    { id: 'role', value: filter.role },
+                    { id: 'ordering', value: filter.ordering },
                 ]);
                 const search = (newFilters.find((f) => f.id === 'name')?.value as string) || '';
-                const status = (newFilters.find((f) => f.id === 'profileStatus')?.value as string) || '';
-                onFilterChange({ search, status });
+                const status = (newFilters.find((f) => f.id === 'status')?.value as string) || '';
+                const role = (newFilters.find((f) => f.id === 'role')?.value as string) || '';
+                const ordering = (newFilters.find((f) => f.id === 'ordering')?.value as string) || '';
+                onFilterChange({ search, status, role, ordering });
             }
         },
         onColumnVisibilityChange: (updater) => {
@@ -111,38 +141,26 @@ export function DataTable<TData, TValue>({
                         {isLoading ? (
                             Array.from({ length: pageSize }).map((_, index) => (
                                 <TableRow key={index}>
-                                    {table.getVisibleLeafColumns().map((column, colIndex) => {
-                                        const columnId = column.id || ((column as any).accessorKey as string);
-                                        if (columnId === 'name') {
-                                            return (
-                                                <TableCell key={colIndex}>
-                                                    <div className="flex flex-col gap-2">
-                                                        <Skeleton className="h-4 w-32" />
-                                                        <Skeleton className="h-3 w-48" />
-                                                    </div>
-                                                </TableCell>
-                                            );
-                                        }
-                                        if (columnId === 'profileStatus') {
-                                            return (
-                                                <TableCell key={colIndex}>
-                                                    <div className="flex w-[100px] items-center">
-                                                        <Skeleton className="h-3 w-4 mr-2" />
-                                                        <Skeleton className="h-3 w-16" />
-                                                    </div>
-                                                </TableCell>
-                                            );
-                                        }
-                                        if (columnId === 'actions') {
-                                            return (
-                                                <TableCell key={colIndex}>
-                                                    <Skeleton className="h-8 w-20" />
-                                                </TableCell>
-                                            );
-                                        }
+                                    {table.getVisibleLeafColumns().map((column) => {
+                                        const columnId = column.id;
                                         return (
-                                            <TableCell key={colIndex}>
-                                                <Skeleton className="h-5 w-16" />
+                                            <TableCell key={columnId}>
+                                                {columnId === 'role' ? (
+                                                    <div className="flex flex-col gap-1">
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {Array.from({ length: 3 }).map((_, i) => (
+                                                                <Skeleton key={i} className="h-5 w-32" />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ) : columnId === 'actions' ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <Skeleton className="h-9 w-16" />
+                                                        <Skeleton className="h-9 w-16" />
+                                                    </div>
+                                                ) : (
+                                                    <Skeleton className="h-5 w-24" />
+                                                )}
                                             </TableCell>
                                         );
                                     })}

@@ -11,6 +11,7 @@ import { NavigationProgress } from '@/components/navigation-progress';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { FontProvider } from '@/context/font-context';
 import { ThemeProvider } from '@/context/theme-context';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     const [queryClient] = useState(
@@ -19,6 +20,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
                 defaultOptions: queryConfig,
             }),
     );
+    const isMobile = useIsMobile();
 
     return (
         <Suspense
@@ -52,7 +54,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
                             </AuthLoader>
                         </FontProvider>
                     </ThemeProvider>
-                    <Toaster richColors position="top-right" duration={2000} closeButton />
+                    <Toaster
+                        richColors
+                        position={isMobile ? 'bottom-center' : 'top-right'}
+                        duration={2000}
+                        closeButton
+                    />
                 </QueryClientProvider>
             </HelmetProvider>
         </Suspense>

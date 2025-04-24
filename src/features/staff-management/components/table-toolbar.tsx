@@ -2,10 +2,11 @@ import { Input } from '@/components/ui/input';
 import { Table } from '@tanstack/react-table';
 import { useDebouncedCallback } from 'use-debounce';
 import { useState, useEffect } from 'react';
-import { DataTableFacetedFilter } from '../../../components/table/data-table-filter';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
-import { DataTableViewOptions } from '../../../components/table/table-view-options';
+import { DataTableFacetedFilter } from '@/components/table/data-table-filter';
+import { DataTableViewOptions } from '@/components/table/table-view-options';
+import { ROLES } from '@/const/role';
 
 interface DataTableToolbarProps<TData> {
     table: Table<TData>;
@@ -35,7 +36,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
         table.resetColumnFilters();
     };
 
-    const statusFilterValue = table.getColumn('profileStatus')?.getFilterValue() as string[] | undefined;
+    const statusFilterValue = table.getColumn('status')?.getFilterValue() as string[] | undefined;
     const hasActiveFilters = searchValue || (statusFilterValue && statusFilterValue.length > 0);
 
     return (
@@ -43,17 +44,36 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
             <div className="flex flex-1 flex-col-reverse items-start gap-y-2 sm:flex-row sm:items-center sm:space-x-2 ">
                 <div className="flex items-center space-x-2 flex-wrap gap-y-4">
                     <Input
-                        placeholder="Search by name or email"
+                        placeholder="Search user"
                         value={searchValue}
                         onChange={(event) => handleSearchChange(event.target.value)}
                         className="h-8 w-[250px] lg:w-[250px]"
                     />
                     <DataTableFacetedFilter
-                        column={table.getColumn('profileStatus')}
-                        title="Profile Status"
+                        column={table.getColumn('role')}
+                        title="Role"
                         options={[
-                            { label: 'Verified', value: 'verified' },
-                            { label: 'Pending', value: 'pending' },
+                            { label: 'Instructor', value: ROLES.INSTRUCTOR.toString() },
+                            { label: 'Co-Instructor', value: ROLES.CO_INSTRUCTOR.toString() },
+                            { label: 'Management', value: ROLES.MANAGEMENT.toString() },
+                            { label: 'Ambassador', value: ROLES.AMBASSADOR.toString() },
+                            { label: 'Education Admin', value: ROLES.EDUCATION_ADMIN.toString() },
+                            { label: 'Education Officer', value: ROLES.EDUCATION_OFFICER.toString() },
+                            { label: 'Admission Advisor', value: ROLES.ADMISSION_ADVISOR.toString() },
+                            { label: 'Finance Officer', value: ROLES.FINANCE_OFFICER.toString() },
+                            { label: 'Curriculum Developer', value: ROLES.CURRICULUM_DEVELOPER.toString() },
+                            { label: 'Finance Admin', value: ROLES.FINANCE_ADMIN.toString() },
+                        ]}
+                        showSearch={false}
+                        multiSelect={false}
+                        table={table}
+                    />
+                    <DataTableFacetedFilter
+                        column={table.getColumn('status')}
+                        title="Status"
+                        options={[
+                            { label: 'Active', value: 'active' },
+                            { label: 'Inactive', value: 'inactive' },
                         ]}
                         showSearch={false}
                         multiSelect={false}
