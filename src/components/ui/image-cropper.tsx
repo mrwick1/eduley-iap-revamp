@@ -141,6 +141,7 @@ export function ImageCropper({ aspectRatio = 1, onCrop, trigger, className }: Im
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
+        setOpen(false);
     };
 
     return (

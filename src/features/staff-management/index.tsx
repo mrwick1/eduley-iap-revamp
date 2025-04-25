@@ -11,10 +11,15 @@ import { usePreferencesStore } from '@/store/usePreferencesStore';
 import { VisibilityState } from '@tanstack/react-table';
 import { useEffect, useState } from 'react';
 import StaffProvider from './context/staff-context';
+import { Drawer } from '@/components/ui/sheet';
+import { StaffForm } from './components/staff-form';
+import { useStaff } from './context/staff-context';
 
 const TABLE_ID = 'staff-management';
 
-export default function StaffManagement() {
+const StaffManagementContent = () => {
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+    const { form, handleFormSubmit } = useStaff();
     const { tables, setTablePreferences } = usePreferencesStore();
     const tablePreferences = tables[TABLE_ID] || {
         activePage: 0,
@@ -30,7 +35,7 @@ export default function StaffManagement() {
         search: tablePreferences.search.name || '',
         status: tablePreferences.filters?.status || '',
         role: tablePreferences.filters?.role || '',
-        ordering: tablePreferences.filters?.ordering || '',
+        ordering: tablePreferences.filters?.ordering || '-id',
     });
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(tablePreferences.visibleColumns || {});
     const [totalCount, setTotalCount] = useState(0);
@@ -57,8 +62,12 @@ export default function StaffManagement() {
         });
     }, [pageIndex, pageSize, columnVisibility, filter, setTablePreferences]);
 
+    const handleSave = () => {
+        form.handleSubmit(handleFormSubmit)();
+    };
+
     return (
-        <StaffProvider>
+        <>
             <div className="flex h-screen flex-col">
                 <Head title="Staff Management" />
                 <Header>
@@ -74,7 +83,7 @@ export default function StaffManagement() {
                                 download the list as an Excel file.
                             </p>
                         </div>
-                        <StaffManagementPrimaryButtons />
+                        <StaffManagementPrimaryButtons onAddStaff={() => setIsDrawerOpen(true)} />
                     </div>
                     <DataTable
                         columns={columns}
@@ -92,6 +101,23 @@ export default function StaffManagement() {
                     />
                 </Main>
             </div>
+            <Drawer
+                open={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                title="Add Staff"
+                onSave={handleSave}
+                onCancel={() => setIsDrawerOpen(false)}
+            >
+                <StaffForm />
+            </Drawer>
+        </>
+    );
+};
+
+export default function StaffManagement() {
+    return (
+        <StaffProvider>
+            <StaffManagementContent />
         </StaffProvider>
     );
 }

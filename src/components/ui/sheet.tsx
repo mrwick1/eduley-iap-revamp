@@ -1,10 +1,9 @@
-'use client';
-
 import * as React from 'react';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { XIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
+import { Button } from './button';
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
     return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -63,10 +62,6 @@ function SheetContent({
                 {...props}
             >
                 {children}
-                <SheetPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-secondary absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none">
-                    <XIcon className="size-4" />
-                    <span className="sr-only">Close</span>
-                </SheetPrimitive.Close>
             </SheetPrimitive.Content>
         </SheetPortal>
     );
@@ -100,4 +95,86 @@ function SheetDescription({ className, ...props }: React.ComponentProps<typeof S
     );
 }
 
-export { Sheet, SheetTrigger, SheetClose, SheetContent, SheetHeader, SheetFooter, SheetTitle, SheetDescription };
+interface DrawerProps extends React.ComponentProps<typeof Sheet> {
+    open: boolean;
+    onClose: () => void;
+    title: string;
+    children: React.ReactNode;
+    onSave?: () => void;
+    onCancel?: () => void;
+    saveLabel?: string;
+    cancelLabel?: string;
+    side?: 'top' | 'right' | 'bottom' | 'left';
+}
+
+function Drawer({
+    open,
+    onClose,
+    title,
+    children,
+    onSave,
+    onCancel,
+    saveLabel = 'Save',
+    cancelLabel = 'Cancel',
+    side = 'right',
+    ...props
+}: DrawerProps) {
+    const handleCancel = onCancel || onClose;
+
+    return (
+        <Sheet open={open} onOpenChange={onClose} {...props}>
+            <SheetContent side={side} className="sm:max-w-[500px] shadow-2xl shadow-black/20">
+                {/* Header */}
+                <SheetHeader className="flex-row justify-between items-center border-b pb-4 bg-gradient-to-r from-background to-muted/5 sticky top-0 z-10">
+                    <SheetTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
+                        <span className="w-1 h-6 bg-primary rounded-full"></span>
+                        {title}
+                    </SheetTitle>
+                    <SheetClose asChild>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 hover:bg-accent rounded-full transition-all duration-200 hover:scale-110"
+                        >
+                            <XIcon className="h-4 w-4" />
+                            <span className="sr-only">Close</span>
+                        </Button>
+                    </SheetClose>
+                </SheetHeader>
+
+                {/* Content */}
+                <div className="flex-1 py-6 px-4">
+                    <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent pr-2">
+                        <div className="space-y-4">{children}</div>
+                    </div>
+                </div>
+
+                {/* Footer */}
+                <SheetFooter className="border-t pt-4 gap-3 sm:flex-row sm:justify-end bg-gradient-to-r from-muted/5 to-background sticky bottom-0 z-10">
+                    {handleCancel && (
+                        <Button variant="outline" onClick={handleCancel} className="shadow-md w-32">
+                            {cancelLabel}
+                        </Button>
+                    )}
+                    {onSave && (
+                        <Button onClick={onSave} className="shadow-md w-32">
+                            {saveLabel}
+                        </Button>
+                    )}
+                </SheetFooter>
+            </SheetContent>
+        </Sheet>
+    );
+}
+
+export {
+    Sheet,
+    SheetTrigger,
+    SheetClose,
+    SheetContent,
+    SheetHeader,
+    SheetFooter,
+    SheetTitle,
+    SheetDescription,
+    Drawer,
+};
