@@ -5,6 +5,8 @@ import { DataTableRowActions } from './table-row-actions';
 import { Status } from '@/components/ui/status';
 import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 export const columns: ColumnDef<Staff>[] = [
     {
@@ -50,7 +52,7 @@ export const columns: ColumnDef<Staff>[] = [
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-                    className="flex items-center gap-1"
+                    className="flex items-center gap-1 font-bold"
                 >
                     Email
                     {column.getIsSorted() === 'asc' ? (
@@ -74,36 +76,35 @@ export const columns: ColumnDef<Staff>[] = [
         accessorKey: 'role',
         cell: ({ row }) => {
             const { groups } = row.original;
-            const firstLine = groups.slice(0, 6);
-            const secondLine = groups.slice(6, 12);
-            const remainingRoles = groups.slice(12);
+            const visibleRoles = groups.slice(0, 3);
+            const hiddenRoles = groups.slice(3);
 
             if (groups.length === 0) {
                 return <p className="text-sm font-medium">N/A</p>;
             }
 
             return (
-                <div className="flex flex-col gap-1">
-                    <div className="flex flex-wrap gap-1">
-                        {firstLine.map((group) => (
-                            <span key={group} className="text-sm font-medium">
-                                {ROLE_NAMES[group]}
-                            </span>
-                        ))}
-                    </div>
-                    {(secondLine.length > 0 || remainingRoles.length > 0) && (
-                        <div className="flex flex-wrap gap-1">
-                            {secondLine.map((group) => (
-                                <span key={group} className="text-sm font-medium">
-                                    {ROLE_NAMES[group]}
-                                </span>
-                            ))}
-                            {remainingRoles.length > 0 && (
-                                <span className="text-sm font-medium text-muted-foreground">
-                                    +{remainingRoles.length} more
-                                </span>
-                            )}
-                        </div>
+                <div className="flex flex-wrap gap-1 items-center">
+                    {visibleRoles.map((group) => (
+                        <Badge key={group} variant="outline">
+                            {ROLE_NAMES[group]}
+                        </Badge>
+                    ))}
+                    {hiddenRoles.length > 0 && (
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <button className="text-sm text-muted-foreground  cursor-pointer">
+                                    +{hiddenRoles.length} more
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="max-w-sm flex flex-wrap gap-1 p-2">
+                                {hiddenRoles.map((group) => (
+                                    <Badge key={group} variant="secondary">
+                                        {ROLE_NAMES[group]}
+                                    </Badge>
+                                ))}
+                            </PopoverContent>
+                        </Popover>
                     )}
                 </div>
             );
