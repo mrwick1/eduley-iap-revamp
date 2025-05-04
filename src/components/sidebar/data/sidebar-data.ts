@@ -1,5 +1,4 @@
 import {
-    IconCreditCard,
     IconLayoutDashboard,
     IconPalette,
     IconSchool,

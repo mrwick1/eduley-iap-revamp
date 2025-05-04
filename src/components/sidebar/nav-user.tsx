@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Palette, Sparkles } from 'lucide-react';
+import { BadgeCheck, Bell, ChevronsUpDown, LogOut, Palette } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
