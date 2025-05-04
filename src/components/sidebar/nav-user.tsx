@@ -23,8 +23,6 @@ export function NavUser() {
     const navigate = useNavigate();
     const { setUser, setAuthenticated } = useUserStore();
     const handleLogout = async () => {
-        console.log('Logging out...');
-
         const promise = logout.mutateAsync({});
         toast.promise(promise, {
             loading: 'Logging out...',

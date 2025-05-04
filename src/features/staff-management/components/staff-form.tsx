@@ -33,7 +33,6 @@ export const StaffForm = () => {
             }
         };
     }, [croppedImageUrl]);
-    console.log(form.formState.errors, 'errors', actionType);
     const handleImageCrop = async (blob: Blob, file: File) => {
         setIsCropping(true);
         try {

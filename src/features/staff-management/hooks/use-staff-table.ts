@@ -38,7 +38,6 @@ export function useStaffTable<TData, TValue>({ columns }: UseStaffTableProps<TDa
         ordering: tablePreferences.filters?.ordering || '-id',
     });
 
-    console.log(filter, 'filter');
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(tablePreferences.visibleColumns || {});
     const [sorting, setSorting] = useState<SortingState>(() => {
         const initialOrdering = tablePreferences.filters?.ordering || '-id';

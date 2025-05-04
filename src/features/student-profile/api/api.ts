@@ -9,18 +9,12 @@ export const getAllStudents = async (
     search: string = '',
     status: string = '',
 ): Promise<ReportResponse> => {
-    console.log(status);
-    // console the endpoint
-    console.log(
-        `${apiEndpoints.studentList}?limit=${limit}&offset=${offset}${search ? `&search=${search}` : ''}${status ? `&profile_verified=${status}` : ''}`,
-    );
     const { data, error } = await tryCatch(async () => {
         const response = await api.get<ReportResponse>(
             `${apiEndpoints.studentList}?limit=${limit}&offset=${offset}${search ? `&search=${search}` : ''}${status ? `&profile_verified=${status}` : ''}`,
         );
         return response.data;
     });
-    console.log(data);
     if (error) {
         throw error;
     }
