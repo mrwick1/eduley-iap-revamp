@@ -1,56 +1,64 @@
 import { Row } from '@tanstack/react-table';
-import { IconTrash, IconDots } from '@tabler/icons-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuSeparator,
-    DropdownMenuShortcut,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useStaff } from '../context/staff-context';
-import { staffSchema } from '../schema/schema';
+import { Staff } from '../types/types';
+import { MoreHorizontal } from 'lucide-react';
 
 interface DataTableRowActionsProps<TData> {
     row: Row<TData>;
 }
 
 export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TData>) {
-    const staff = staffSchema.parse(row.original);
+    const staff = row.original as Staff;
+    const { openDrawerForAction, handleOpenDeleteConfirm, handleOpenActivateConfirm, handleOpenDeactivateConfirm } =
+        useStaff();
 
-    const { setOpen, setCurrentRow } = useStaff();
+    const handleEdit = () => {
+        openDrawerForAction('edit', staff);
+    };
+
+    const handleDelete = () => {
+        handleOpenDeleteConfirm(String(staff.id));
+    };
+
+    const handleActivate = () => {
+        handleOpenActivateConfirm(String(staff.id));
+    };
+
+    const handleDeactivate = () => {
+        handleOpenDeactivateConfirm(String(staff.id));
+    };
 
     return (
-        <DropdownMenu modal={false}>
+        <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="data-[state=open]:bg-muted flex h-8 w-8 p-0">
-                    <IconDots className="h-4 w-4" />
+                <Button variant="ghost" className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+                    <MoreHorizontal className="h-4 w-4" />
                     <span className="sr-only">Open menu</span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[160px]">
-                <DropdownMenuItem
-                    onClick={() => {
-                        setCurrentRow(staff);
-                        setOpen('update');
-                    }}
-                >
-                    Edit
-                </DropdownMenuItem>
-                {staff.instructor_id && <DropdownMenuItem>Update Instructor Qualification</DropdownMenuItem>}
-
+                <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem
-                    onClick={() => {
-                        setCurrentRow(staff);
-                        setOpen('delete');
-                    }}
-                >
+                {staff.is_active ? (
+                    <DropdownMenuItem onClick={handleDeactivate} className="text-orange-600 focus:text-orange-600">
+                        Deactivate
+                    </DropdownMenuItem>
+                ) : (
+                    <DropdownMenuItem onClick={handleActivate} className="text-green-600 focus:text-green-600">
+                        Activate
+                    </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
                     Delete
-                    <DropdownMenuShortcut>
-                        <IconTrash size={16} />
-                    </DropdownMenuShortcut>
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

@@ -58,48 +58,58 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ) => {
         const Comp = asChild ? Slot : 'button';
         const isDisabled = disabled || loading;
-        const showInfoIcon = disabledMessage || infoMessage;
-        const tooltipMessage = isDisabled ? disabledMessage : infoMessage;
+        const showDisabledInfoIcon = isDisabled && !!disabledMessage;
+        const showEnabledInfoTooltip = !isDisabled && !!infoMessage;
 
-        return (
-            <div className="relative">
-                <Comp
-                    ref={ref}
-                    data-slot="button"
-                    className={cn(
-                        buttonVariants({ variant, size, className }),
-                        showInfoIcon && 'pr-4',
-                        isDisabled && 'pointer-events-none',
-                    )}
-                    disabled={isDisabled}
-                    {...props}
-                >
-                    {loading ? (
-                        <>
-                            <Loader2 className="animate-spin" data-testid="loader" />
-                            {children}
-                        </>
-                    ) : (
-                        <>
-                            {children}
-                            {showInfoIcon && (
-                                <Tooltip message={tooltipMessage}>
-                                    <div
-                                        role="button"
-                                        tabIndex={0}
-                                        className="text-muted-foreground hover:text-foreground cursor-help pointer-events-auto"
-                                        onClick={(e) => e.stopPropagation()}
-                                        onMouseDown={(e) => e.stopPropagation()}
-                                    >
-                                        <InfoIcon className="size-4" />
-                                    </div>
-                                </Tooltip>
-                            )}
-                        </>
-                    )}
-                </Comp>
-            </div>
+        const buttonElement = (
+            <Comp
+                ref={ref}
+                data-slot="button"
+                className={cn(
+                    buttonVariants({ variant, size, className }),
+                    showDisabledInfoIcon && 'pr-4',
+                    isDisabled && 'pointer-events-none',
+                )}
+                disabled={isDisabled}
+                {...props}
+            >
+                {loading ? (
+                    <>
+                        <Loader2 className="animate-spin" data-testid="loader" />
+                        {children}
+                    </>
+                ) : (
+                    <>
+                        {children}
+                        {showDisabledInfoIcon && (
+                            <Tooltip message={disabledMessage}>
+                                <div
+                                    role="button"
+                                    tabIndex={0}
+                                    className="text-muted-foreground hover:text-foreground cursor-help pointer-events-auto"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }}
+                                >
+                                    <InfoIcon className="size-4" />
+                                </div>
+                            </Tooltip>
+                        )}
+                    </>
+                )}
+            </Comp>
         );
+
+        if (showEnabledInfoTooltip) {
+            return <Tooltip message={infoMessage}>{buttonElement}</Tooltip>;
+        }
+
+        return buttonElement;
     },
 );
 

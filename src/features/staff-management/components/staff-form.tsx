@@ -12,11 +12,13 @@ import { Spinner } from '@/components/ui/spinner';
 import { Tooltip } from '@/components/ui/tooltip';
 import { getRoles } from '@/features/settings/account/api/api';
 import { useStaff } from '../context/staff-context';
+import { Switch } from '@/components/ui/switch';
 
 export const StaffForm = () => {
-    const { form, isSubmitting } = useStaff();
+    const { form, isSubmitting, actionType } = useStaff();
     const [isCropping, setIsCropping] = React.useState(false);
     const [croppedImageUrl, setCroppedImageUrl] = React.useState<string | null>(null);
+    const isEditing = actionType === 'edit';
 
     // get all the roles from the api
     const { data: roles, isLoading: isRolesLoading } = useQuery({
@@ -31,19 +33,14 @@ export const StaffForm = () => {
             }
         };
     }, [croppedImageUrl]);
-
+    console.log(form.formState.errors, 'errors', actionType);
     const handleImageCrop = async (blob: Blob, file: File) => {
         setIsCropping(true);
         try {
             const imageUrl = URL.createObjectURL(blob);
             setCroppedImageUrl(imageUrl);
 
-            form.setValue(
-                'profile_photo',
-                Object.assign(file, {
-                    preview: imageUrl,
-                }),
-            );
+            form.setValue('profile_photo', file);
         } catch (error) {
             console.error('Error handling cropped image:', error);
         } finally {
@@ -61,7 +58,9 @@ export const StaffForm = () => {
                 currentGroups.filter((id) => id !== groupId),
             );
         } else {
-            form.setValue('groups', [...currentGroups, groupId]);
+            form.setValue('groups', [...currentGroups, groupId], {
+                shouldValidate: true,
+            });
         }
     };
 
@@ -102,7 +101,7 @@ export const StaffForm = () => {
                             onCrop={handleImageCrop}
                             trigger={
                                 <Button variant="outline" type="button" disabled={isSubmitting}>
-                                    Change Photo
+                                    {croppedImageUrl || form.watch('profile_photo') ? 'Change Photo' : 'Upload Photo'}
                                 </Button>
                             }
                         />
@@ -110,17 +109,17 @@ export const StaffForm = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-4">
                     <FormField
                         control={form.control}
                         name="first_name"
                         render={({ field }) => (
                             <FormItem className="relative">
-                                <FormLabel>First Name</FormLabel>
+                                <FormLabel required>First Name</FormLabel>
                                 <FormControl>
                                     <Input placeholder="John" {...field} disabled={isSubmitting} />
                                 </FormControl>
-                                <FormMessage className="absolute -bottom-5 left-0" />
+                                <FormMessage className="absolute -bottom-6 left-0" />
                             </FormItem>
                         )}
                     />
@@ -130,11 +129,11 @@ export const StaffForm = () => {
                         name="last_name"
                         render={({ field }) => (
                             <FormItem className="relative">
-                                <FormLabel>Last Name</FormLabel>
+                                <FormLabel required>Last Name</FormLabel>
                                 <FormControl>
                                     <Input placeholder="Doe" {...field} disabled={isSubmitting} />
                                 </FormControl>
-                                <FormMessage className="absolute -bottom-5 left-0" />
+                                <FormMessage className="absolute -bottom-6 left-0" />
                             </FormItem>
                         )}
                     />
@@ -145,7 +144,7 @@ export const StaffForm = () => {
                     name="email"
                     render={({ field }) => (
                         <FormItem className="relative">
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel required>Email</FormLabel>
                             <FormControl>
                                 <Input placeholder="john@example.com" {...field} disabled={isSubmitting} />
                             </FormControl>
@@ -155,23 +154,25 @@ export const StaffForm = () => {
                     )}
                 />
 
-                <FormField
-                    control={form.control}
-                    name="password"
-                    render={({ field }) => (
-                        <FormItem className="relative">
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                                <Input type="password" placeholder="••••••••" {...field} disabled={isSubmitting} />
-                            </FormControl>
-                            <FormDescription>
-                                Password must be at least 8 characters long and contain at least one uppercase letter,
-                                one lowercase letter, and one number.
-                            </FormDescription>
-                            {/* <FormMessage className="absolute -bottom-5 left-0" /> */}
-                        </FormItem>
-                    )}
-                />
+                {!isEditing && (
+                    <FormField
+                        control={form.control}
+                        name="password"
+                        render={({ field }) => (
+                            <FormItem className="relative">
+                                <FormLabel required>Password</FormLabel>
+                                <FormControl>
+                                    <Input type="password" placeholder="••••••••" {...field} disabled={isSubmitting} />
+                                </FormControl>
+                                <FormDescription>
+                                    Password must be at least 8 characters long and contain at least 3 of the following:
+                                    lowercase letters, uppercase letters, numbers, or special characters (!@#$%^&*)
+                                </FormDescription>
+                                {/* <FormMessage className="absolute -bottom-6 left-0" /> */}
+                            </FormItem>
+                        )}
+                    />
+                )}
 
                 <FormField
                     control={form.control}
@@ -236,6 +237,31 @@ export const StaffForm = () => {
                         </FormItem>
                     )}
                 />
+
+                {isEditing && (
+                    <FormField
+                        control={form.control}
+                        name="is_active"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                    <FormLabel className="text-base">Staff Status</FormLabel>
+                                    <FormDescription>
+                                        Control whether this staff member account is active or inactive. If disabled,
+                                        the staff member will not be able to login to the system.
+                                    </FormDescription>
+                                </div>
+                                <FormControl>
+                                    <Switch
+                                        checked={field.value}
+                                        onCheckedChange={field.onChange}
+                                        disabled={isSubmitting}
+                                    />
+                                </FormControl>
+                            </FormItem>
+                        )}
+                    />
+                )}
             </form>
         </Form>
     );

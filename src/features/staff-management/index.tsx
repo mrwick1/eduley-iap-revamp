@@ -3,68 +3,76 @@ import { Head } from '@/components/seo/head';
 import { Header } from '@/components/sidebar/Header';
 import { Main } from '@/layout/main';
 import { StaffManagementPrimaryButtons } from './components/primary-button';
-import { getAllStaff } from './api/api';
-import { useQuery } from '@tanstack/react-query';
 import { columns } from './components/columns';
 import { DataTable } from './components/data-table';
-import { usePreferencesStore } from '@/store/usePreferencesStore';
-import { VisibilityState } from '@tanstack/react-table';
-import { useEffect, useState } from 'react';
-import StaffProvider from './context/staff-context';
+import StaffProvider, { useStaff } from './context/staff-context';
 import { Drawer } from '@/components/ui/sheet';
 import { StaffForm } from './components/staff-form';
-import { useStaff } from './context/staff-context';
-
-const TABLE_ID = 'staff-management';
+import { ConfirmDialog } from '@/components/confirm-dialogue';
+import { useMemo } from 'react';
 
 const StaffManagementContent = () => {
-    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-    const { form, handleFormSubmit } = useStaff();
-    const { tables, setTablePreferences } = usePreferencesStore();
-    const tablePreferences = tables[TABLE_ID] || {
-        activePage: 0,
-        rowsPerPage: 10,
-        visibleColumns: {} as VisibilityState,
-        search: { name: '' },
-        filters: { status: '', role: '', ordering: '' },
-    };
-
-    const [pageIndex, setPageIndex] = useState(tablePreferences.activePage);
-    const [pageSize, setPageSize] = useState(tablePreferences.rowsPerPage);
-    const [filter, setFilter] = useState<{ search: string; status: string; role: string; ordering: string }>({
-        search: tablePreferences.search.name || '',
-        status: tablePreferences.filters?.status || '',
-        role: tablePreferences.filters?.role || '',
-        ordering: tablePreferences.filters?.ordering || '-id',
-    });
-    const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(tablePreferences.visibleColumns || {});
-    const [totalCount, setTotalCount] = useState(0);
-    const { data, isLoading } = useQuery({
-        queryKey: ['staff', pageIndex, pageSize, filter],
-        queryFn: () =>
-            getAllStaff(pageSize, pageIndex * pageSize, filter.search, filter.status, filter.role, filter.ordering),
-    });
-
-    useEffect(() => {
-        if (!isLoading && data?.count !== undefined) {
-            setTotalCount(data.count);
-        }
-    }, [data?.count, isLoading]);
-
-    // Update store when preferences change
-    useEffect(() => {
-        setTablePreferences(TABLE_ID, {
-            activePage: pageIndex,
-            rowsPerPage: pageSize,
-            visibleColumns: columnVisibility,
-            search: { name: filter.search },
-            filters: { status: filter.status, role: filter.role },
-        });
-    }, [pageIndex, pageSize, columnVisibility, filter, setTablePreferences]);
+    const {
+        form,
+        handleFormSubmit,
+        isDrawerOpen,
+        setIsDrawerOpen,
+        isSubmitting,
+        actionType,
+        openDrawerForAction,
+        isConfirmOpen,
+        confirmActionType,
+        isConfirmLoading,
+        handleConfirmAction,
+        handleCloseConfirm,
+    } = useStaff();
 
     const handleSave = () => {
         form.handleSubmit(handleFormSubmit)();
     };
+
+    const isEditing = actionType === 'edit';
+    const drawerTitle = isEditing ? 'Edit Staff' : 'Add New Staff';
+    const drawerDescription = isEditing
+        ? 'Update the details for this staff member.'
+        : 'Add a new staff member to the system.';
+
+    const handleAddStaffClick = () => {
+        openDrawerForAction('add');
+    };
+
+    const confirmDialogContent = useMemo(() => {
+        switch (confirmActionType) {
+            case 'delete':
+                return {
+                    title: 'Delete Staff Member',
+                    desc: 'Are you sure you want to delete this staff member? This action cannot be undone.',
+                    confirmText: 'Delete',
+                    destructive: true,
+                };
+            case 'activate':
+                return {
+                    title: 'Activate Staff Member',
+                    desc: 'Are you sure you want to activate this staff member?',
+                    confirmText: 'Activate',
+                    destructive: false,
+                };
+            case 'deactivate':
+                return {
+                    title: 'Deactivate Staff Member',
+                    desc: 'Are you sure you want to deactivate this staff member? They will lose access.',
+                    confirmText: 'Deactivate',
+                    destructive: true,
+                };
+            default:
+                return {
+                    title: '',
+                    desc: '',
+                    confirmText: 'Confirm',
+                    destructive: false,
+                };
+        }
+    }, [confirmActionType]);
 
     return (
         <>
@@ -83,33 +91,34 @@ const StaffManagementContent = () => {
                                 download the list as an Excel file.
                             </p>
                         </div>
-                        <StaffManagementPrimaryButtons onAddStaff={() => setIsDrawerOpen(true)} />
+                        <StaffManagementPrimaryButtons onAddStaff={handleAddStaffClick} />
                     </div>
-                    <DataTable
-                        columns={columns}
-                        data={data?.results || []}
-                        pageIndex={pageIndex}
-                        pageSize={pageSize}
-                        onPageChange={setPageIndex}
-                        onPageSizeChange={setPageSize}
-                        totalCount={totalCount ?? 0}
-                        isLoading={isLoading}
-                        filter={filter}
-                        onFilterChange={setFilter}
-                        columnVisibility={columnVisibility}
-                        onColumnVisibilityChange={setColumnVisibility}
-                    />
+                    <DataTable columns={columns} />
                 </Main>
             </div>
             <Drawer
+                maxWidth="600px"
                 open={isDrawerOpen}
                 onClose={() => setIsDrawerOpen(false)}
-                title="Add Staff"
+                title={drawerTitle}
                 onSave={handleSave}
                 onCancel={() => setIsDrawerOpen(false)}
+                isLoading={isSubmitting}
+                description={drawerDescription}
             >
                 <StaffForm />
             </Drawer>
+
+            <ConfirmDialog
+                open={isConfirmOpen}
+                onOpenChange={handleCloseConfirm}
+                title={confirmDialogContent.title}
+                desc={confirmDialogContent.desc}
+                confirmText={confirmDialogContent.confirmText}
+                destructive={confirmDialogContent.destructive}
+                isLoading={isConfirmLoading}
+                handleConfirm={handleConfirmAction}
+            />
         </>
     );
 };

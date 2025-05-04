@@ -7,6 +7,7 @@ import { ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export const columns: ColumnDef<Staff>[] = [
     {
@@ -38,11 +39,18 @@ export const columns: ColumnDef<Staff>[] = [
         header: 'Name',
         accessorKey: 'name',
         cell: ({ row }) => {
-            const { first_name, last_name } = row.original;
+            const { first_name, last_name, profile_photo } = row.original;
+            const initials = `${first_name?.[0] ?? ''}`.toUpperCase();
             return (
-                <p className="text-sm font-medium">
-                    {first_name} {last_name}
-                </p>
+                <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={profile_photo ?? undefined} alt={`${first_name} ${last_name}`} />
+                        <AvatarFallback>{initials}</AvatarFallback>
+                    </Avatar>
+                    <p className="text-sm font-medium">
+                        {first_name} {last_name}
+                    </p>
+                </div>
             );
         },
     },

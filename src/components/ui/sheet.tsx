@@ -4,6 +4,7 @@ import { XIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 import { Button } from './button';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
     return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -21,18 +22,21 @@ function SheetPortal({ ...props }: React.ComponentProps<typeof SheetPrimitive.Po
     return <SheetPrimitive.Portal data-slot="sheet-portal" {...props} />;
 }
 
-function SheetOverlay({ className, ...props }: React.ComponentProps<typeof SheetPrimitive.Overlay>) {
-    return (
-        <SheetPrimitive.Overlay
-            data-slot="sheet-overlay"
-            className={cn(
-                'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50',
-                className,
-            )}
-            {...props}
-        />
-    );
-}
+const SheetOverlay = React.forwardRef<
+    React.ElementRef<typeof SheetPrimitive.Overlay>,
+    React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
+>(({ className, ...props }, ref) => (
+    <SheetPrimitive.Overlay
+        ref={ref}
+        data-slot="sheet-overlay"
+        className={cn(
+            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50',
+            className,
+        )}
+        {...props}
+    />
+));
+SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 function SheetContent({
     className,
@@ -60,6 +64,10 @@ function SheetContent({
                     className,
                 )}
                 {...props}
+                onCloseAutoFocus={(event) => {
+                    event.preventDefault();
+                    document.body.style.pointerEvents = '';
+                }}
             >
                 {children}
             </SheetPrimitive.Content>
@@ -89,7 +97,7 @@ function SheetDescription({ className, ...props }: React.ComponentProps<typeof S
     return (
         <SheetPrimitive.Description
             data-slot="sheet-description"
-            className={cn('text-muted-foreground text-sm', className)}
+            className={cn('text-muted-foreground text-xs', className)}
             {...props}
         />
     );
@@ -105,6 +113,9 @@ interface DrawerProps extends React.ComponentProps<typeof Sheet> {
     saveLabel?: string;
     cancelLabel?: string;
     side?: 'top' | 'right' | 'bottom' | 'left';
+    isLoading?: boolean;
+    description?: React.ReactNode;
+    maxWidth?: string;
 }
 
 function Drawer({
@@ -116,21 +127,30 @@ function Drawer({
     onCancel,
     saveLabel = 'Save',
     cancelLabel = 'Cancel',
-    side = 'right',
+    isLoading,
+    description,
+    maxWidth = '500px',
     ...props
 }: DrawerProps) {
     const handleCancel = onCancel || onClose;
+    const isMobile = useIsMobile();
+
+    const drawerSide = isMobile ? 'bottom' : 'right';
+    const baseDrawerClassName = cn('shadow-2xl shadow-black/20 flex flex-col', isMobile ? 'h-[100dvh]' : '');
+    const finalDrawerClassName = cn(baseDrawerClassName, !isMobile && `md:max-w-[${maxWidth}]`);
 
     return (
         <Sheet open={open} onOpenChange={onClose} {...props}>
-            <SheetContent side={side} className="sm:max-w-[500px] shadow-2xl shadow-black/20">
-                {/* Header */}
-                <SheetHeader className="flex-row justify-between items-center border-b pb-4 bg-gradient-to-r from-background to-muted/5 sticky top-0 z-10">
-                    <SheetTitle className="text-lg font-semibold text-foreground flex items-center gap-2">
-                        <span className="w-1 h-6 bg-primary rounded-full"></span>
-                        {title}
-                    </SheetTitle>
-                    <SheetClose asChild>
+            <SheetContent side={drawerSide} className={finalDrawerClassName}>
+                <SheetHeader className="flex-row justify-between items-start border-b p-4 bg-gradient-to-r from-background to-muted/5 sticky top-0 z-10">
+                    <div className="flex items-start gap-2 mr-4">
+                        <span className="w-1 bg-primary rounded-full self-stretch"></span>
+                        <div className="flex flex-col">
+                            <SheetTitle className="text-lg font-semibold text-foreground">{title}</SheetTitle>
+                            {description && <SheetDescription>{description}</SheetDescription>}
+                        </div>
+                    </div>
+                    <SheetClose asChild className="mt-1">
                         <Button
                             variant="ghost"
                             size="icon"
@@ -142,22 +162,23 @@ function Drawer({
                     </SheetClose>
                 </SheetHeader>
 
-                {/* Content */}
-                <div className="flex-1 py-6 px-4">
-                    <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent pr-2">
-                        <div className="space-y-4">{children}</div>
-                    </div>
+                <div className="flex-1 overflow-y-auto py-6 px-4 scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent">
+                    <div className="space-y-4 pr-2">{children}</div>
                 </div>
 
-                {/* Footer */}
-                <SheetFooter className="border-t pt-4 gap-3 sm:flex-row sm:justify-end bg-gradient-to-r from-muted/5 to-background sticky bottom-0 z-10">
+                <SheetFooter className="border-t pt-4 gap-3 flex-row justify-end bg-gradient-to-r from-muted/5 to-background sticky bottom-0 z-10">
                     {handleCancel && (
-                        <Button variant="outline" onClick={handleCancel} className="shadow-md w-32">
+                        <Button
+                            variant="outline"
+                            onClick={handleCancel}
+                            className="shadow-md w-32"
+                            disabled={isLoading}
+                        >
                             {cancelLabel}
                         </Button>
                     )}
                     {onSave && (
-                        <Button onClick={onSave} className="shadow-md w-32">
+                        <Button onClick={onSave} className="shadow-md w-32" loading={isLoading}>
                             {saveLabel}
                         </Button>
                     )}
