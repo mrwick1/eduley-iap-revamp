@@ -37,6 +37,8 @@ export function useStaffTable<TData, TValue>({ columns }: UseStaffTableProps<TDa
         role: tablePreferences.filters?.role || '',
         ordering: tablePreferences.filters?.ordering || '-id',
     });
+
+    console.log(filter, 'filter');
     const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(tablePreferences.visibleColumns || {});
     const [sorting, setSorting] = useState<SortingState>(() => {
         const initialOrdering = tablePreferences.filters?.ordering || '-id';
@@ -119,6 +121,32 @@ export function useStaffTable<TData, TValue>({ columns }: UseStaffTableProps<TDa
         },
 
         onColumnVisibilityChange: setColumnVisibility,
+        onColumnFiltersChange: (updater) => {
+            let newFilters: Record<string, string> = {};
+            if (typeof updater === 'function') {
+                const currentFilters = [
+                    { id: 'name', value: filter.search },
+                    { id: 'status', value: filter.status },
+                    { id: 'role', value: filter.role },
+                ];
+                const updatedFilters = updater(currentFilters);
+                updatedFilters.forEach((f) => {
+                    newFilters[f.id] = f.value as string;
+                });
+            } else {
+                updater.forEach((f) => {
+                    newFilters[f.id] = f.value as string;
+                });
+            }
+
+            setFilter((prev) => ({
+                ...prev,
+                search: newFilters['name'] ?? '',
+                status: newFilters['status'] ?? '',
+                role: newFilters['role'] ?? '',
+            }));
+            setPageIndex(0); // Reset page index when filters change
+        },
     });
 
     return {

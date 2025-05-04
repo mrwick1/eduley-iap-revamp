@@ -55,7 +55,7 @@ export const StaffForm = () => {
         if (currentGroups.includes(groupId)) {
             form.setValue(
                 'groups',
-                currentGroups.filter((id) => id !== groupId),
+                currentGroups.filter((id: number) => id !== groupId),
             );
         } else {
             form.setValue('groups', [...currentGroups, groupId], {
@@ -182,7 +182,7 @@ export const StaffForm = () => {
                             <FormLabel>Roles</FormLabel>
                             {selectedGroups.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mb-2">
-                                    {selectedGroups.map((groupId) => {
+                                    {selectedGroups.map((groupId: number) => {
                                         const role = roles?.find((r) => r.id === groupId);
                                         return role ? (
                                             <Badge

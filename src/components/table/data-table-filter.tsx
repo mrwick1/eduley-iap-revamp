@@ -106,7 +106,6 @@ export function DataTableFacetedFilter<TData, TValue>({
                                                 if (isSelected) {
                                                     column?.setFilterValue(undefined);
                                                 } else {
-                                                    console.log(option.value);
                                                     column?.setFilterValue([option.value]);
                                                 }
                                             }
