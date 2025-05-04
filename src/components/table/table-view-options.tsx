@@ -22,7 +22,7 @@ export function DataTableViewOptions<TData>({ table }: DataTableViewOptionsProps
                     variant="outline"
                     size="sm"
                     className="ml-auto  h-8 lg:flex"
-                    infoMessage="Choose which columns to display and hide"
+                    infoMessage="Show/hide table columns"
                 >
                     <Settings2 className="mr-2 h-4 w-4" />
                     View

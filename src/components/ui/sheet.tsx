@@ -137,11 +137,12 @@ function Drawer({
 
     const drawerSide = isMobile ? 'bottom' : 'right';
     const baseDrawerClassName = cn('shadow-2xl shadow-black/20 flex flex-col', isMobile ? 'h-[100dvh]' : '');
-    const finalDrawerClassName = cn(baseDrawerClassName, !isMobile && `md:max-w-[${maxWidth}]`);
+    const finalDrawerClassName = cn(baseDrawerClassName);
+    const drawerStyle = !isMobile ? { maxWidth: maxWidth } : {};
 
     return (
         <Sheet open={open} onOpenChange={onClose} {...props}>
-            <SheetContent side={drawerSide} className={finalDrawerClassName}>
+            <SheetContent side={drawerSide} className={finalDrawerClassName} style={drawerStyle}>
                 <SheetHeader className="flex-row justify-between items-start border-b p-4 bg-gradient-to-r from-background to-muted/5 sticky top-0 z-10">
                     <div className="flex items-start gap-2 mr-4">
                         <span className="w-1 bg-primary rounded-full self-stretch"></span>

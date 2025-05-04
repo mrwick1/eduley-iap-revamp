@@ -61,13 +61,41 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         const showDisabledInfoIcon = isDisabled && !!disabledMessage;
         const showEnabledInfoTooltip = !isDisabled && !!infoMessage;
 
+        // State to detect touch device
+        const [isTouchDevice, setIsTouchDevice] = React.useState(false);
+
+        React.useEffect(() => {
+            const touchSupported = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+            setIsTouchDevice(touchSupported);
+        }, []);
+
+        // Original InfoIcon div (used only if tooltip is shown)
+        const DisabledInfoIcon = () => (
+            <div
+                role="button"
+                tabIndex={0}
+                className="text-muted-foreground hover:text-foreground cursor-help pointer-events-auto"
+                onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }}
+                onMouseDown={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }}
+            >
+                <InfoIcon className="size-4" />
+            </div>
+        );
+
         const buttonElement = (
             <Comp
                 ref={ref}
                 data-slot="button"
                 className={cn(
                     buttonVariants({ variant, size, className }),
-                    showDisabledInfoIcon && 'pr-4',
+                    // Only add padding if the icon is actually shown (not touch)
+                    showDisabledInfoIcon && !isTouchDevice && 'pr-4',
                     isDisabled && 'pointer-events-none',
                 )}
                 disabled={isDisabled}
@@ -81,23 +109,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
                 ) : (
                     <>
                         {children}
-                        {showDisabledInfoIcon && (
+                        {/* Only show Tooltip + Icon if needed and not on touch */}
+                        {showDisabledInfoIcon && !isTouchDevice && (
                             <Tooltip message={disabledMessage}>
-                                <div
-                                    role="button"
-                                    tabIndex={0}
-                                    className="text-muted-foreground hover:text-foreground cursor-help pointer-events-auto"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }}
-                                    onMouseDown={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }}
-                                >
-                                    <InfoIcon className="size-4" />
-                                </div>
+                                <DisabledInfoIcon />
                             </Tooltip>
                         )}
                     </>
@@ -105,7 +120,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             </Comp>
         );
 
-        if (showEnabledInfoTooltip) {
+        // Only wrap with Tooltip if needed and not on touch
+        if (showEnabledInfoTooltip && !isTouchDevice) {
             return <Tooltip message={infoMessage}>{buttonElement}</Tooltip>;
         }
 

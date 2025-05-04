@@ -11,7 +11,13 @@ export const StudentProfilePrimaryButtons = ({
 }) => {
     return (
         <div className="flex gap-2 pb-2">
-            <Button variant="outline" className="space-x-1" onClick={handleDownloadExcel} disabled={isDownloading}>
+            <Button
+                variant="outline"
+                className="space-x-1"
+                onClick={handleDownloadExcel}
+                disabled={isDownloading}
+                infoMessage="Export all student's data in excel format"
+            >
                 <span>Export Excel</span>
                 {isDownloading ? <Spinner size="sm" /> : <IconDownload size={18} />}
             </Button>

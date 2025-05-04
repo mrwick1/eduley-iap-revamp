@@ -1,5 +1,5 @@
 import { Outlet } from '@tanstack/react-router';
-import { IconBrowserCheck, IconNotification, IconPalette, IconTool, IconUser } from '@tabler/icons-react';
+import { IconPalette, IconUser } from '@tabler/icons-react';
 import { Separator } from '@/components/ui/separator';
 import { Search } from '@/components/search';
 import { Header } from '@/components/sidebar/Header';
@@ -41,24 +41,10 @@ const sidebarNavItems = [
         icon: <IconUser size={18} />,
         href: '/settings/profile',
     },
-    {
-        title: 'Account',
-        icon: <IconTool size={18} />,
-        href: '/settings/account',
-    },
+
     {
         title: 'Appearance',
         icon: <IconPalette size={18} />,
         href: '/settings/appearance',
-    },
-    {
-        title: 'Notifications',
-        icon: <IconNotification size={18} />,
-        href: '/settings/notifications',
-    },
-    {
-        title: 'Display',
-        icon: <IconBrowserCheck size={18} />,
-        href: '/settings/display',
     },
 ];

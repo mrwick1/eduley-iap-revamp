@@ -1,5 +1,5 @@
 import { Link, useNavigate } from '@tanstack/react-router';
-import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from 'lucide-react';
+import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Palette, Sparkles } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
@@ -86,12 +86,12 @@ export function NavUser() {
                             </div>
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
+                        {/* <DropdownMenuGroup>
                             <DropdownMenuItem>
                                 <Sparkles />
                                 Upgrade to Pro
                             </DropdownMenuItem>
-                        </DropdownMenuGroup>
+                        </DropdownMenuGroup> */}
                         <DropdownMenuSeparator />
                         <DropdownMenuGroup>
                             <DropdownMenuItem asChild>
@@ -100,10 +100,11 @@ export function NavUser() {
                                     Account
                                 </Link>
                             </DropdownMenuItem>
+                            {/* appearance */}
                             <DropdownMenuItem asChild>
-                                <Link to="/">
-                                    <CreditCard />
-                                    Billing
+                                <Link to="/settings/appearance">
+                                    <Palette />
+                                    Appearance
                                 </Link>
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>

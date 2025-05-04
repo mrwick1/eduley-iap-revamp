@@ -1,13 +1,9 @@
 import {
-    IconBrowserCheck,
     IconCreditCard,
-    IconHelp,
     IconLayoutDashboard,
-    IconNotification,
     IconPalette,
     IconSchool,
     IconSettings,
-    IconTool,
     IconUserCog,
     IconUsers,
 } from '@tabler/icons-react';
@@ -29,11 +25,11 @@ export const sidebarData: SidebarData = {
                     url: '/student-profile',
                     icon: IconSchool,
                 },
-                {
-                    title: 'Payment Plan',
-                    url: '/',
-                    icon: IconCreditCard,
-                },
+                // {
+                //     title: 'Payment Plan',
+                //     url: '/',
+                //     icon: IconCreditCard,
+                // },
             ],
         },
         {
@@ -59,33 +55,19 @@ export const sidebarData: SidebarData = {
                             url: '/settings/profile',
                             icon: IconUserCog,
                         },
-                        {
-                            title: 'Account',
-                            url: '/settings',
-                            icon: IconTool,
-                        },
+
                         {
                             title: 'Appearance',
                             url: '/settings/appearance',
                             icon: IconPalette,
                         },
-                        {
-                            title: 'Notifications',
-                            url: '/settings',
-                            icon: IconNotification,
-                        },
-                        {
-                            title: 'Display',
-                            url: '/settings',
-                            icon: IconBrowserCheck,
-                        },
                     ],
                 },
-                {
-                    title: 'Help Center',
-                    url: '/',
-                    icon: IconHelp,
-                },
+                // {
+                //     title: 'Help Center',
+                //     url: '/',
+                //     icon: IconHelp,
+                // },
             ],
         },
     ],
