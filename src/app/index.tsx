@@ -6,7 +6,7 @@ import { Navigate } from '@tanstack/react-router';
 import { settingsRoute, profileRoute, appearanceRoute } from './routes/settings-route';
 import { loginRoute } from './routes/login-route';
 import { dashboardRoute } from './routes/dashboard-route';
-import { studentProfileRoute } from './routes/student-profile-route';
+import { studentProfileRoute, studentDetailsRoute } from './routes/student-profile-route';
 import { staffRoute } from './routes/staff-route';
 
 // Root route with layout
@@ -47,6 +47,7 @@ const routeTree = rootRoute.addChildren([
     settingsRoute.addChildren([profileRoute, appearanceRoute]),
     studentProfileRoute,
     staffRoute,
+    studentDetailsRoute,
 ]);
 
 // Create the router

@@ -5,6 +5,8 @@ import { Tooltip } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Status } from '@/components/ui/status';
+import { router } from '@/app';
+import { studentDetailsRoute } from '@/app/routes/student-profile-route';
 
 export const columns: ColumnDef<StudentProfile>[] = [
     {
@@ -104,7 +106,12 @@ export const columns: ColumnDef<StudentProfile>[] = [
         cell: ({ row }) => {
             const { id } = row.original;
             return (
-                <Button variant="outline" size="sm" key={id}>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    key={id}
+                    onClick={() => router.navigate({ to: studentDetailsRoute.fullPath, params: { id: id.toString() } })}
+                >
                     <Eye className="h-4 w-4" />
                     <span>View</span>
                 </Button>
