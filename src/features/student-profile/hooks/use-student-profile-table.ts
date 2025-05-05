@@ -10,7 +10,6 @@ import {
     getCoreRowModel,
     getPaginationRowModel,
     getSortedRowModel, // Keep if sorting is needed later
-    SortingState, // Keep if sorting is needed later
 } from '@tanstack/react-table';
 
 const TABLE_ID = 'student-profile';

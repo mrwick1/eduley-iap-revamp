@@ -140,7 +140,7 @@ export const columns: ColumnDef<Staff>[] = [
             } = useStaff();
 
             return (
-                <DataTableRowActions row={row}>
+                <DataTableRowActions>
                     <DropdownMenuItem onClick={() => openDrawerForAction('edit', row.original)}>Edit</DropdownMenuItem>
                     {row.original.is_active ? (
                         <DropdownMenuItem
