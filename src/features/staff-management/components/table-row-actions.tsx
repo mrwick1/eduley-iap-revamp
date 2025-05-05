@@ -29,11 +29,11 @@ export function DataTableRowActions<TData>({ row }: DataTableRowActionsProps<TDa
     };
 
     const handleActivate = () => {
-        handleOpenActivateConfirm(String(staff.id));
+        handleOpenActivateConfirm(String(staff.id), staff.groups);
     };
 
     const handleDeactivate = () => {
-        handleOpenDeactivateConfirm(String(staff.id));
+        handleOpenDeactivateConfirm(String(staff.id), staff.groups);
     };
 
     return (

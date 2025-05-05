@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useStaff } from '../context/staff-context';
+import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 
 export const columns: ColumnDef<Staff>[] = [
     {
@@ -130,7 +132,39 @@ export const columns: ColumnDef<Staff>[] = [
         header: 'Actions',
         accessorKey: 'actions',
         cell: ({ row }) => {
-            return <DataTableRowActions row={row} />;
+            const {
+                openDrawerForAction,
+                handleOpenDeleteConfirm,
+                handleOpenActivateConfirm,
+                handleOpenDeactivateConfirm,
+            } = useStaff();
+
+            return (
+                <DataTableRowActions row={row}>
+                    <DropdownMenuItem onClick={() => openDrawerForAction('edit', row.original)}>Edit</DropdownMenuItem>
+                    {row.original.is_active ? (
+                        <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => handleOpenDeactivateConfirm(String(row.original.id), row.original.groups)}
+                        >
+                            Deactivate
+                        </DropdownMenuItem>
+                    ) : (
+                        <DropdownMenuItem
+                            onClick={() => handleOpenActivateConfirm(String(row.original.id), row.original.groups)}
+                        >
+                            Activate
+                        </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => handleOpenDeleteConfirm(String(row.original.id))}
+                    >
+                        Delete
+                    </DropdownMenuItem>
+                </DataTableRowActions>
+            );
         },
     },
 ];

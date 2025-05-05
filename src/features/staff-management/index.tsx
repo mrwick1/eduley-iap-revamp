@@ -3,7 +3,6 @@ import { Head } from '@/components/seo/head';
 import { Header } from '@/components/sidebar/Header';
 import { Main } from '@/layout/main';
 import { StaffManagementPrimaryButtons } from './components/primary-button';
-import { columns } from './components/columns';
 import { DataTable } from './components/data-table';
 import StaffProvider, { useStaff } from './context/staff-context';
 import { Drawer } from '@/components/ui/sheet';
@@ -93,7 +92,7 @@ const StaffManagementContent = () => {
                         </div>
                         <StaffManagementPrimaryButtons onAddStaff={handleAddStaffClick} />
                     </div>
-                    <DataTable columns={columns} />
+                    <DataTable />
                 </Main>
             </div>
             <Drawer
