@@ -12,14 +12,14 @@ export default function StudentDetails() {
 
     return (
         <div className="flex h-screen flex-col">
-            <Head title={`Student Profile - ${id}`} />
+            <Head title={`Student Details - ${id}`} />
             <Header>
                 <Search />
             </Header>
             <Main>
                 <div className="mb-2 flex flex-wrap items-end justify-between space-y-2 gap-y-2.5">
                     <div className="space-y-1">
-                        <h1 className="text-xl font-bold tracking-tight md:text-2xl">Student Profile</h1>
+                        <h1 className="text-xl font-bold tracking-tight md:text-2xl">Student Details</h1>
                         <p className=" text-muted-foreground text-sm md:text-base">
                             Overview of key information related to an individual student, including their personal and
                             academic details
